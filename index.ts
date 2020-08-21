@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra'
 import {binance} from './src/binance'
-import {calculatePriceDecreaseForTicks, getDescendingTicks, getTicksPrices, Ticks} from './src/tick/tick'
+import {calculatePriceFluctuation, getDescendingTicks, getTicksPrices, Ticks} from './src/tick/tick'
 
 const config = {
   minVolume: 10000, // remove symbols with lower volume
@@ -10,7 +10,7 @@ const config = {
 
 getDescendingTicks('ETHBTC', '1d', {limit: 30})
   .then((ticks: Ticks) => {
-    console.log(`ETHBTC: ${calculatePriceDecreaseForTicks(getTicksPrices(ticks)).toFixed(2)}%`)
+    console.log(`ETHBTC: ${calculatePriceFluctuation(getTicksPrices(ticks)).toFixed(2)}%`)
     return ticks
   })
 

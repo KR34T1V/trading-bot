@@ -29,10 +29,13 @@ export function getDescendingTicks(symbol: string, duration: string = '1d', opti
     })
 }
 
-export function calculatePriceDecreaseForTicks(prices: Array<number>) {
-  console.log('prices', prices)
+export function calculatePriceFluctuation(prices: Array<number>) {
   const minPrice = Math.min(...prices)
   const maxPrice = Math.max(...prices)
-  console.log(minPrice, maxPrice, 'min - max')
-  return (minPrice - maxPrice) / maxPrice * 100
+  const minIndex = prices.lastIndexOf(minPrice)
+  const maxIndex = prices.indexOf(maxPrice)
+
+  return minIndex < maxIndex
+    ? (maxPrice - minPrice) / minPrice * 100
+    : (minPrice - maxPrice) / maxPrice * 100
 }
