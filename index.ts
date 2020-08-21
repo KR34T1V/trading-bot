@@ -1,12 +1,6 @@
 import * as fs from 'fs-extra'
-import {linearRegression, max} from 'simple-statistics'
-import {getTicksPrices, latestNPricesWithIndex} from './src/tick/tick'
-
-const Binance = require('node-binance-api')
-const binance = new Binance().options({
-  APIKEY: 'Gvp1asgJcxL5U4ZJKRFaEeTY0D5xmdsl9WCFTHrDU7Y6MIWmmkChEmeU01bmNHpF',
-  APISECRET: 'HgqsIGFLTxioxWwns3BCcXuF81mFS7drmq33nlwLfUadumlar2BYi057p9NIe2V0'
-})
+import {binance} from './src/binance'
+import {calculatePriceDecreaseForTicks, getDescendingTicks} from './src/tick/tick'
 
 const config = {
   minVolume: 10000, // remove symbols with lower volume
@@ -15,33 +9,8 @@ const config = {
 }
 
 
-// https://simplestatistics.org/docs/#linearregression
-function getDescendingTicks(symbol: string, duration: string = '1d', options?: object) {
-  return binance.candlesticks(symbol, duration, false, options)
-    .then(ticks => {
-      for (let i = 5; i<=25; i+=5) {
-        console.log('prices', latestNPricesWithIndex(ticks))
-        console.log('prices', latestNPricesWithIndex(ticks, i))
-        let s1 = linearRegression(latestNPricesWithIndex(ticks, i))
-        let s2 = linearRegression(latestNPricesWithIndex(ticks, i+5))
-        console.log(s1, s2, 'slope')
-        if (s1.m < s2.m) return ticks.slice(-i)
-      }
-      return ticks
-    })
-}
-
 getDescendingTicks('ETHBTC', '1d', {limit: 30})
   .then(ticks => {console.log(`ETHBTC: ${calculatePriceDecreaseForTicks(ticks).toFixed(2)}%`); return ticks})
-
-function calculatePriceDecreaseForTicks(ticks: Array<Array<any>>) {
-  const prices = getTicksPrices(ticks)
-  console.log('prices', prices)
-  const minPrice = Math.min(...prices)
-  const maxPrice = Math.max(...prices)
-  console.log(minPrice, maxPrice, 'min - max')
-  return (minPrice - maxPrice) / maxPrice * 100
-}
 
 // binance.prices()
 //   .then(excludeNonBTCSymbols)
