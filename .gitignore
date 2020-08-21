@@ -1,0 +1,6 @@
+.DS_Store
+.idea
+.jest
+node_modules
+coverage
+store
