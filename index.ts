@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra'
 import {binance} from './src/binance'
-import {calculatePriceDecreaseForTicks, getDescendingTicks} from './src/tick/tick'
+import {calculatePriceDecreaseForTicks, getDescendingTicks, getTicksPrices, Ticks} from './src/tick/tick'
 
 const config = {
   minVolume: 10000, // remove symbols with lower volume
@@ -8,9 +8,11 @@ const config = {
   conversionRate: '' // 0 || Date.bought - Date.sold / profit
 }
 
-
 getDescendingTicks('ETHBTC', '1d', {limit: 30})
-  .then(ticks => {console.log(`ETHBTC: ${calculatePriceDecreaseForTicks(ticks).toFixed(2)}%`); return ticks})
+  .then((ticks: Ticks) => {
+    console.log(`ETHBTC: ${calculatePriceDecreaseForTicks(getTicksPrices(ticks)).toFixed(2)}%`)
+    return ticks
+  })
 
 // binance.prices()
 //   .then(excludeNonBTCSymbols)
@@ -22,8 +24,9 @@ function excludeNonBTCSymbols(prices: Object) {
   return Object.keys(prices)
     .filter(key => key.endsWith(config.baseCurrency))
     .reduce((obj, key) => {
-      obj[key] = prices[key];
-      return obj;
+      // @ts-ignore
+      obj[key] = prices[key]
+      return obj
     }, {})
 }
 
@@ -41,7 +44,7 @@ async function getPrices() {
   let prices = await binance.prices()
   for (let [symbol, currentPrice] of Object.entries(prices)) {
     // console.log(symbol + ':' + price);
-    await binance.candlesticks(symbol, '1d', (error, ticks, symbol) => {
+    await binance.candlesticks(symbol, '1d', (error: any, ticks: Ticks, symbol: string) => {
       // console.info("candlesticks()", ticks);
       let oldestTick = ticks[0]
       let [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = oldestTick

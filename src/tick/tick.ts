@@ -1,20 +1,22 @@
 import {linearRegression} from 'simple-statistics'
 import {binance} from '../binance'
 
-export function latestNPricesWithIndex(ticks, n?: number) {
+export type Ticks = Array<Array<any>>
+
+export function latestNPricesWithIndex(ticks: Ticks, n?: number) {
   return getTicksPrices(ticks)
-    .slice(-n)
+    .slice(n ? -n : ticks.length)
     .map((e, i) => [i, e])
 }
 
-export function getTicksPrices(ticks) {
+export function getTicksPrices(ticks: Ticks) {
   return ticks.map((e) => Number(e[4]))
 }
 
 // https://simplestatistics.org/docs/#linearregression
 export function getDescendingTicks(symbol: string, duration: string = '1d', options?: object) {
   return binance.candlesticks(symbol, duration, false, options)
-    .then(ticks => {
+    .then((ticks: Ticks) => {
       for (let i = 5; i <= 25; i += 5) {
         console.log('prices', latestNPricesWithIndex(ticks))
         console.log('prices', latestNPricesWithIndex(ticks, i))
@@ -27,8 +29,7 @@ export function getDescendingTicks(symbol: string, duration: string = '1d', opti
     })
 }
 
-export function calculatePriceDecreaseForTicks(ticks: Array<Array<any>>) {
-  const prices = getTicksPrices(ticks)
+export function calculatePriceDecreaseForTicks(prices: Array<number>) {
   console.log('prices', prices)
   const minPrice = Math.min(...prices)
   const maxPrice = Math.max(...prices)
