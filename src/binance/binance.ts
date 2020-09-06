@@ -1,4 +1,4 @@
-import Binance, {Symbols, Tick} from 'node-binance-api'
+import Binance, {Account, Balance, Symbols, Tick} from 'node-binance-api'
 import {config} from '../config/config'
 import {getTicksPrices} from './tick'
 
@@ -22,8 +22,8 @@ export function getHistoricPricesForSymbols(symbols: Symbols): Promise<SymbolPri
   }))
 }
 
-export function getBalanceForCoin(coin: string): Promise<any> {
+export function getBalanceForCoin(coin: string): Promise<number | undefined> {
   return binance.account()
-    // .then((it: Account) => it.balances.find(b => b.asset === coin))
-    // .then((it: Balance | undefined) => it?.free)
+    .then((it: Account) => it.balances.find(b => b.asset === coin))
+    .then((it: Balance) => it?.free)
 }

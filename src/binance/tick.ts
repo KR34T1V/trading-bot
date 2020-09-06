@@ -1,10 +1,10 @@
 import {Tick} from 'node-binance-api'
 import {linearRegression} from 'simple-statistics'
 import {config} from '../config/config'
-import {InvestmentPossibility} from '../investment-posibility/InvestmentPossibility'
+import {InvestmentCandidate} from '../find-coins/findCoins'
 import {SymbolPrices} from './binance'
 
-export function buildInvestmentPossibilities(s: SymbolPrices): InvestmentPossibility {
+export function buildInvestmentPossibilities(s: SymbolPrices): InvestmentCandidate {
   let prices = detectDescendingTrend(s.prices)
 
   const td = calculateTrendDirection(prices)
