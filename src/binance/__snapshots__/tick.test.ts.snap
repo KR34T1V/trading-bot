@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`detectDescendingTrend detects descending trend 1`] = `
+Array [
+  0.00001206,
+  0.00001189,
+  0.00000815,
+  0.00000607,
+  0.00000567,
+  0.00000688,
+  0.00000574,
+  0.00000559,
+  0.00000479,
+  0.00000457,
+]
+`;

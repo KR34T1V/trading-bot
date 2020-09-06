@@ -1,76 +1,22 @@
-import * as fs from 'fs-extra'
-import {binance} from './src/binance'
-import {calculatePriceFluctuation, getDescendingTicks, getTicksPrices, Ticks} from './src/tick/tick'
+import {getAllSymbols, getHistoricPricesForSymbols} from './src/binance/binance'
+import {buildInvestmentPossibilities} from './src/binance/tick'
+import {
+  excludeNonBTCSymbols, excludeSymbolsIfLatestPriceIsNotLowest,
+  sortInvestPossibilityByPriceAscending
+} from './src/investment-posibility/InvestmentPossibility'
 
-const config = {
-  minVolume: 10000, // remove symbols with lower volume
-  baseCurrency: 'BTC',
-  conversionRate: '' // 0 || Date.bought - Date.sold / profit
+
+function getPrices() {
+  return getAllSymbols()
+    .then(excludeNonBTCSymbols)
+    // .then(it => it.slice(0, 30))
+    .then(getHistoricPricesForSymbols)
+    .then(excludeSymbolsIfLatestPriceIsNotLowest)
+    // .then((it: any) => saveToFile(it, 'test.json'))
+    // .then((it: any) => {console.log(it, 'before');return it})
+    .then(it => it.map(buildInvestmentPossibilities))
+    .then(sortInvestPossibilityByPriceAscending)
+    .then(it => console.log(it, 'end'))
 }
 
-getDescendingTicks('ETHBTC', '1d', {limit: 30})
-  .then((ticks: Ticks) => {
-    console.log(`ETHBTC: ${calculatePriceFluctuation(getTicksPrices(ticks)).toFixed(2)}%`)
-    return ticks
-  })
-
-// binance.prices()
-//   .then(excludeNonBTCSymbols)
-//   .then(response => {console.log(response); return response})
-//   .then(it => saveToFile(it, 'test.json'))
-//   .then()
-
-function excludeNonBTCSymbols(prices: Object) {
-  return Object.keys(prices)
-    .filter(key => key.endsWith(config.baseCurrency))
-    .reduce((obj, key) => {
-      // @ts-ignore
-      obj[key] = prices[key]
-      return obj
-    }, {})
-}
-
-function saveToFile(data: Object, fileName: string) {
-  fs.writeJson(fileName, data, err => {
-    if (err) return console.error(err)
-    console.log('success!')
-  })
-  return data
-}
-
-
-async function getPrices() {
-  let deltas = []
-  let prices = await binance.prices()
-  for (let [symbol, currentPrice] of Object.entries(prices)) {
-    // console.log(symbol + ':' + price);
-    await binance.candlesticks(symbol, '1d', (error: any, ticks: Ticks, symbol: string) => {
-      // console.info("candlesticks()", ticks);
-      let oldestTick = ticks[0]
-      let [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = oldestTick
-      let delta = ((Number(currentPrice) / close)).toString()
-      console.info(symbol + ': ' + delta)
-      deltas.push({symbol, delta, volume})
-    }, {limit: 90})
-  }
-  console.log('end get')
-}
-
-// getPrices()
-
-type Symbol = {
-  symbol: string
-  delta: number
-  volume: number
-}
-//
-// fs.readJSON('delta.json').then((prices) => {
-//   const deltas = Object.values(prices)
-//     .sort((a: Symbol, b: Symbol) => (a.delta > b.delta) ? 1 : -1)
-//     // .filter((s: Symbol) => s.volume > config.minVolume)
-//   fs.writeJson('./sort-delta.json', deltas, err => {
-//     if (err) return console.error(err)
-//     // console.log('success!')
-//   })
-// })
-//
+getPrices()
