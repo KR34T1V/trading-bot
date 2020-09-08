@@ -1,19 +1,19 @@
 declare module 'node-binance-api' {
   export default class Binance {
-    options(binance: {APIKEY?: string; APISECRET?: string})
+    options(binance: {APIKEY?: string; APISECRET?: string}): Binance
 
     candlesticks(symbol: string, interval: string, callback: any, options: Options): Promise<Tick[]>
 
     account(): Promise<Account>
 
-    prices(): Promise<Object>
+    prices(): Promise<CoinPrices>
   }
 
   export type Options = {
     limit?: number
   }
 
-  export type Symbols = Array<string>
+  export type CoinPrices = {[k: string] : number}
 
   export type Balance = {
     asset: string

@@ -26,5 +26,6 @@ export function findCoinsToBuy() {
     .then(it => it.map(buildInvestmentPossibilities))
     .then(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing))
     .then(sortInvestPossibilityByPriceAscending)
-    .then(it => console.log(it, 'end'))
+    .then(it => {console.log(it, 'end'); return it})
+    .then(it => it.map((e => e.symbol)))
 }

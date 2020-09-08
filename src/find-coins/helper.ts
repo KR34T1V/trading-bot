@@ -1,9 +1,8 @@
-import {Symbols} from 'node-binance-api'
 import {SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
 import {InvestmentCandidate} from './findCoins'
 
-export function excludeNonBTCSymbols(symbols: Symbols): Symbols {
+export function excludeNonBTCSymbols(symbols: Array<string>): Array<string> {
   return symbols.filter(symbol => symbol.endsWith(config.baseCurrency))
 }
 
