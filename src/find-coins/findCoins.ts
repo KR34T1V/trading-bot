@@ -1,7 +1,8 @@
+import {catchError, map, switchMap} from 'rxjs/operators'
 import {getAllSymbols, getHistoricPricesForSymbols} from '../binance/binance'
-import {buildInvestmentPossibilities} from '../binance/tick'
 import {config} from '../config/config'
 import {
+  buildInvestmentPossibilities,
   excludeNonBTCSymbols,
   excludeSymbolsIfLatestPriceIsNotLowest,
   excludeSymbolsWithTooLowPriceSwing,
@@ -18,14 +19,14 @@ export type InvestmentCandidate = {
   priceSwing: number
 }
 
-export function findCoinsToBuy() {
-  return getAllSymbols()
-    .then(excludeNonBTCSymbols)
-    .then(getHistoricPricesForSymbols)
-    .then(excludeSymbolsIfLatestPriceIsNotLowest)
-    .then(it => it.map(buildInvestmentPossibilities))
-    .then(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing))
-    .then(sortInvestPossibilityByPriceAscending)
-    .then(it => {console.log(it, 'end'); return it})
-    .then(it => it.map((e => e.symbol)))
+export function findInvestmentCandidates() {
+  return getAllSymbols().pipe(
+    map(excludeNonBTCSymbols),
+    switchMap(getHistoricPricesForSymbols),
+    map(excludeSymbolsIfLatestPriceIsNotLowest),
+    map(it => it.map(buildInvestmentPossibilities)),
+    map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
+    map(sortInvestPossibilityByPriceAscending),
+    // tap(it => console.log(it, 'findCoinsToBuy'))
+  )
 }

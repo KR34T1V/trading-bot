@@ -1,29 +1,39 @@
-import Binance, {Account, Balance, Tick} from 'node-binance-api'
+import Binance, {Tick} from 'node-binance-api'
+import {from, Observable} from 'rxjs'
+import {map} from 'rxjs/operators'
 import {config} from '../config/config'
-import {getTicksPrices} from './tick'
 
 export const binance = new Binance().options(config.binance)
 
-export function getAllSymbols(): Promise<Array<string>> {
-  return binance.prices()
-    .then((symbols: {}) => Object.keys(symbols))
+export function getAllSymbols(): Observable<Array<string>> {
+  return from(binance.prices()).pipe(
+    map(it => Object.keys(it))
+  )
 }
 
 export type SymbolPrices = {symbol: string, prices: Array<number>}
 
-export function getHistoricPricesForSymbols(symbols: Array<string>): Promise<SymbolPrices[]> {
-  return Promise.all(symbols.map((s: string) => {
-    const {interval, limit} = config.binance.historicData
-    return binance.candlesticks(s, interval, false, {limit})
-      .then((t: Tick[]) => ({
-        symbol: s,
-        prices: getTicksPrices(t)
-      }))
-  }))
+export function getTicksPrices(ticks: Tick[]): number[] {
+  return ticks.map((e) => Number(e[4]))
 }
 
-export function getBalanceForCoin(coin: string): Promise<number | undefined> {
-  return binance.account()
-    .then((it: Account) => it.balances.find(b => b.asset === coin))
-    .then((it?: Balance) => Number(it?.free))
+export function getHistoricPricesForSymbols(symbols: Array<string>): Observable<SymbolPrices[]> {
+  return from(
+    Promise.all(
+      symbols.map((s: string) => {
+        const {interval, limit} = config.binance.historicData
+        return binance.candlesticks(s, interval, false, {limit})
+          .then((t: Tick[]) => ({
+            symbol: s,
+            prices: getTicksPrices(t)
+          }))
+      })
+    )
+  )
+}
+
+export function getBalanceForCoin(symbol: string): Observable<number> {
+  return from(binance.balances()).pipe(
+    map(it => Number(it[symbol]))
+  )
 }

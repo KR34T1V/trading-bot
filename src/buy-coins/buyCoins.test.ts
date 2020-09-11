@@ -1,4 +1,7 @@
-import {calculateHowManyOfEachCoinsToBuy} from './buyCoins'
+import {marbles} from 'rxjs-marbles'
+import {calculateHowManyOfEachCoinsToBuy, getFundsToInvest} from './buyCoins'
+
+jest.unmock('./buyCoins')
 
 describe(calculateHowManyOfEachCoinsToBuy, function () {
   it('returns how much to buy', function () {
@@ -8,7 +11,11 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       'b': 2,
       'c': 3
     }
-    expect(calculateHowManyOfEachCoinsToBuy(6, symbolsToBuy, coinPrices))
+    expect(calculateHowManyOfEachCoinsToBuy({
+      fundsToInvest: 6,
+      coinsToBuy: symbolsToBuy,
+      coinPrices
+    }))
       .toEqual({
         a: 3,
         b: 1
@@ -21,7 +28,11 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       'b': 2,
       'c': 1
     }
-    expect(calculateHowManyOfEachCoinsToBuy(1, symbolsToBuy, coinPrices))
+    expect(calculateHowManyOfEachCoinsToBuy({
+      fundsToInvest: 1,
+      coinsToBuy: symbolsToBuy,
+      coinPrices
+    }))
       .toEqual({})
   })
   it('returns empty object if there are no symbols to buy', function () {
@@ -31,7 +42,19 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       'b': 2,
       'c': 1
     }
-    expect(calculateHowManyOfEachCoinsToBuy(1, symbolsToBuy, coinPrices))
+    expect(calculateHowManyOfEachCoinsToBuy({
+      fundsToInvest: 1,
+      coinsToBuy: symbolsToBuy,
+      coinPrices
+    }))
       .toEqual({})
   })
+})
+
+describe(getFundsToInvest, function () {
+  it('returns amount to invest', marbles(m => {
+    m.expect(getFundsToInvest()).toBeObservable('(a|)', {
+      a: 0.25
+    })
+  }))
 })

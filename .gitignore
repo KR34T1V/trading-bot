@@ -3,4 +3,4 @@
 .jest
 node_modules
 coverage
-store
+yarn-error.log

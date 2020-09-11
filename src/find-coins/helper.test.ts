@@ -1,8 +1,69 @@
-import {calculatePriceFluctuation, computeAverage, detectDescendingTrend, latestNPricesWithIndex} from './tick'
+import {SymbolPrices} from '../binance/binance'
+import {
+  calculatePriceFluctuation, computeAverage,
+  detectDescendingTrend,
+  excludeNonBTCSymbols,
+  excludeSymbolsIfLatestPriceIsNotLowest,
+  excludeSymbolsWithTooLowPriceSwing, latestNPricesWithIndex
+} from './helper'
 
-jest.unmock('./tick')
+jest.unmock('./helper')
+jest.unmock('simple-statistics')
 
-describe(detectDescendingTrend.name, function () {
+describe(excludeNonBTCSymbols.name, function () {
+  it('removes non-BTC symbols', function () {
+    const symbols = ['SKYETH', 'WTCBTC']
+    expect(excludeNonBTCSymbols(symbols)).toEqual(['WTCBTC'])
+  })
+})
+
+describe(excludeSymbolsIfLatestPriceIsNotLowest.name, function () {
+  it('returns only symbols where latest price is lowest', function () {
+    const symbolPrices: SymbolPrices[] = [
+      {symbol: 'SKYETH2', prices: [1,2,3]},
+      {symbol: 'SKYETH', prices: [3,2,1]},
+      {symbol: 'WTCBTC', prices: [1,2,1]},
+    ]
+    expect(excludeSymbolsIfLatestPriceIsNotLowest(symbolPrices)).toEqual(symbolPrices.slice(-2))
+  })
+})
+
+describe(excludeSymbolsWithTooLowPriceSwing, function () {
+  it('filters out symbols with a too low price drop', function () {
+    const ip = [{
+      symbol: 'XVGBTC',
+      prices: [
+        5.7e-7, 5.9e-7,
+        5.7e-7, 5.6e-7,
+        5.3e-7, 5.2e-7,
+        4.8e-7, 5.1e-7,
+        4.6e-7, 4.6e-7
+      ],
+      maxPrice: 5.9e-7,
+      minPrice: 4.6e-7,
+      slope: -1.4848484848484848e-8,
+      priceSwing: -11.033898305084744,
+      trendDirection: 1.141304347826087
+    },
+      {
+        symbol: 'DENTBTC',
+        prices: [
+          5e-8, 5e-8, 5e-8,
+          4e-8, 4e-8, 4e-8,
+          4e-8, 5e-8, 4e-8,
+          4e-8
+        ],
+        maxPrice: 5e-8,
+        minPrice: 4e-8,
+        slope: -9.696969696969645e-10,
+        priceSwing: -9.999999999999996,
+        trendDirection: 1.0999999999999996
+      }]
+    expect(excludeSymbolsWithTooLowPriceSwing(ip, -10)).toEqual([ip[0]])
+  })
+})
+
+describe(detectDescendingTrend, function () {
   const prices = [
     0.00001302, 0.00001313,  0.0000133,
     0.00001282,  0.0000123, 0.00001195,
@@ -16,7 +77,7 @@ describe(detectDescendingTrend.name, function () {
     0.00000559, 0.00000479, 0.00000457
   ]
   it('detects descending trend', function () {
-    expect(detectDescendingTrend(prices)).toMatchSnapshot()
+    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-10))
   })
 })
 

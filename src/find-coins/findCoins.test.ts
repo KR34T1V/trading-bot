@@ -1,45 +1,28 @@
-import {excludeNonBTCSymbols, excludeSymbolsWithTooLowPriceSwing} from './helper'
+import {marbles} from 'rxjs-marbles'
+import {findInvestmentCandidates, InvestmentCandidate} from './findCoins'
 
 jest.unmock('./findCoins')
+jest.unmock('./helper')
 
-describe(excludeNonBTCSymbols.name, function () {
-  it('removes non-BTC symbols', function () {
-    const symbols = ['SKYETH', 'WTCBTC']
-    expect(excludeNonBTCSymbols(symbols)).toEqual(['WTCBTC'])
-  })
-})
-
-describe(excludeSymbolsWithTooLowPriceSwing, function () {
-  it('filters out symbols with a too low price drop', function () {
-    const ip = [{
-      symbol: 'XVGBTC',
+describe(findInvestmentCandidates, function () {
+  it('returns coins to buy', marbles(m => {
+    const investmentCandidate: InvestmentCandidate = {
+      symbol: 'ETHBTC',
       prices: [
-        5.7e-7, 5.9e-7,
-        5.7e-7, 5.6e-7,
-        5.3e-7, 5.2e-7,
-        4.8e-7, 5.1e-7,
-        4.6e-7, 4.6e-7
+        0.039875, 0.0386,
+        0.037616, 0.036882,
+        0.032961, 0.034398,
+        0.034086, 0.033312,
+        0.034332, 0.031
       ],
-      maxPrice: 5.9e-7,
-      minPrice: 4.6e-7,
-      slope: -1.4848484848484848e-8,
-      priceSwing: -11.033898305084744,
-      trendDirection: 1.141304347826087
-    },
-      {
-        symbol: 'DENTBTC',
-        prices: [
-          5e-8, 5e-8, 5e-8,
-          4e-8, 4e-8, 4e-8,
-          4e-8, 5e-8, 4e-8,
-          4e-8
-        ],
-        maxPrice: 5e-8,
-        minPrice: 4e-8,
-        slope: -9.696969696969645e-10,
-        priceSwing: -9.999999999999996,
-        trendDirection: 1.0999999999999996
-      }]
-    expect(excludeSymbolsWithTooLowPriceSwing(ip, -10)).toEqual([ip[0]])
-  })
+      maxPrice: 0.039875,
+      minPrice: 0.031,
+      slope: -0.0008377090909090931,
+      priceSwing: -22.257053291536053,
+      trendDirection: 1.1389096774193548
+    }
+    m.expect(findInvestmentCandidates()).toBeObservable('(a|)', {
+      a: [investmentCandidate]
+    })
+  }))
 })

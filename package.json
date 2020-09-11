@@ -1,35 +1,43 @@
 {
-  "name": "trading-bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
-  "scripts": {
-    "check-ts": "yarn tsc --skipLibCheck --noEmit",
-    "test": "jest"
-  },
-  "author": "vrihlea@gmail.com",
-  "license": "ISC",
-  "dependencies": {
-    "@babel/preset-flow": "^7.10.4",
-    "@types/fs-extra": "^9.0.1",
-    "node-binance-api": "^0.11.11",
-    "simple-statistics": "^7.1.0",
-    "ts-jest": "^26.2.0",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.7"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.11.4",
-    "@babel/preset-env": "^7.11.0",
-    "@babel/preset-typescript": "^7.10.4",
-    "@types/jest": "^26.0.10",
-    "babel-jest": "^26.3.0",
-    "jest": "^26.4.1"
-  },
-  "jest": {
-    "automock": false,
-    "transform": {
-      "\\.(ts)$": "ts-jest"
-    }
-  }
+   "name": "trading-bot",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.ts",
+   "scripts": {
+      "check-ts": "yarn tsc --skipLibCheck --noEmit",
+      "test": "jest",
+      "start": "ts-node index.ts"
+   },
+   "author": "vrihlea@gmail.com",
+   "license": "ISC",
+   "dependencies": {
+      "@babel/preset-flow": "^7.10.4",
+      "@types/node": "^14.6.4",
+      "node-binance-api": "^0.11.11",
+      "rxjs": "^6.6.3",
+      "simple-statistics": "^7.1.0",
+      "ts-jest": "^26.2.0",
+      "ts-node": "^8.10.2",
+      "typeorm": "0.2.25",
+      "typescript": "^3.9.7"
+   },
+   "devDependencies": {
+      "@babel/core": "^7.11.4",
+      "@babel/preset-env": "^7.11.0",
+      "@babel/preset-typescript": "^7.10.4",
+      "@types/jest": "^26.0.10",
+      "babel-jest": "^26.3.0",
+      "jest": "^26.4.1",
+      "rxjs-marbles": "^6.0.1"
+   },
+   "jest": {
+      "timers": "modern",
+      "automock": true,
+      "unmockedModulePathPatterns": [
+         "<rootDir>/node_modules/*"
+      ],
+      "transform": {
+         "\\.(ts)$": "ts-jest"
+      }
+   }
 }
