@@ -1,4 +1,4 @@
-import Binance, {Tick} from 'node-binance-api'
+import Binance, {BoughtCoin, CoinPrices, Tick} from 'node-binance-api'
 import {from, Observable} from 'rxjs'
 import {map} from 'rxjs/operators'
 import {config} from '../config/config'
@@ -33,7 +33,15 @@ export function getHistoricPricesForSymbols(symbols: Array<string>): Observable<
 }
 
 export function getBalanceForCoin(symbol: string): Observable<number> {
-  return from(binance.balances()).pipe(
-    map(it => Number(it[symbol]))
+  return from(binance.account()).pipe(
+    map(it => Number(it.balances.find(b => b.free === config.baseCurrency)))
   )
+}
+
+export function marketBuy(symbol: string, quantity: number): Observable<BoughtCoin> {
+  return from(binance.marketBuy(symbol, quantity))
+}
+
+export function getSymbolsWithPrices(): Observable<CoinPrices> {
+  return from(binance.prices())
 }

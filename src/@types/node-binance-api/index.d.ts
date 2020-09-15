@@ -5,13 +5,14 @@ declare module 'node-binance-api' {
     candlesticks(symbol: string, interval: string, callback: any, options: Options): Promise<Tick[]>
 
     account(): Promise<Account>
-    balances(): Promise<CoinPrices>
+    balance(): Promise<CoinPrices>
 
     prices(): Promise<CoinPrices>
-    marketBuy(symbol: string, quantity: number): BuyResult
+    marketBuy(symbol: string, quantity: number): Promise<BoughtCoin>
   }
 
-  export type BuyResult = {
+  export type BoughtCoin = {
+    executedQty: string
     orderId: string
     symbol: string
     price: string

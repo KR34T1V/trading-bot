@@ -1,18 +1,9 @@
-import {zip} from 'rxjs'
-import {map} from 'rxjs/operators'
-import {
-  calculateHowManyOfEachCoinsToBuy,
-  findCoinsToBuy,
-  getFundsToInvest,
-  getSymbolsWithPrices
-} from './src/buy-coins/buyCoins'
-import {findInvestmentCandidates} from './src/find-coins/findCoins'
+import {map, tap} from 'rxjs/operators'
+import {buyCoins} from './src/buy-coins/buyCoins'
+import {findInvestmentCandidates} from './src/find-coins/findInvestmentCandidates'
 
-function main() {
-  // const fundsToInvest =
-  // const investmentCandidates =
-  // const symbolPrices = getSymbolsWithPrices()
-  // buyCoins(coinsToBuy, investmentCandidates)
-}
-
-main()
+findInvestmentCandidates().pipe(
+  map(it => buyCoins(it)),
+  tap(it => {console.log(it)})
+)
+//   .subscribe()

@@ -1,7 +1,7 @@
 import {linearRegression} from 'simple-statistics'
 import {SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
-import {InvestmentCandidate} from './findCoins'
+import {InvestmentCandidate} from './findInvestmentCandidates'
 
 export function excludeNonBTCSymbols(symbols: Array<string>): Array<string> {
   return symbols.filter(symbol => symbol.endsWith(config.baseCurrency))
@@ -23,7 +23,7 @@ export function excludeSymbolsWithTooLowPriceSwing(ip: InvestmentCandidate[], pr
   return ip.filter(e => e.priceSwing < priceSwing)
 }
 
-export function buildInvestmentPossibilities(s: SymbolPrices): InvestmentCandidate {
+export function buildInvestmentCandidates(s: SymbolPrices): InvestmentCandidate {
   let prices = detectDescendingTrend(s.prices)
 
   const td = calculateTrendDirection(prices)
@@ -33,18 +33,19 @@ export function buildInvestmentPossibilities(s: SymbolPrices): InvestmentCandida
     maxPrice: Math.max(...prices),
     minPrice: Math.min(...prices),
     slope: linearRegression(latestNPricesWithIndex(prices)).m,
-    priceSwing: calculatePriceFluctuation(prices, td),
+    priceSwing: calculatePriceSwing(prices, td),
     trendDirection: td
   }
 }
 
 export function detectDescendingTrend(prices: number[]) {
-  let lr1, lr2, i = Math.min(prices.length, config.descendingTrendSliceSize)
+  let td1, td2, i = Math.min(prices.length, config.descendingTrendSliceSize)
+  let step = i
   do {
-    lr1 = linearRegression(latestNPricesWithIndex(prices, i))
-    lr2 = linearRegression(latestNPricesWithIndex(prices, i + i))
-    i = Math.min(prices.length, i + i)
-  } while (lr2.m > lr1.m)
+    td1 = computeAverage(prices.slice(-i, -i*2))
+    td2 = computeAverage(prices.slice(-i*2, -i*3))
+    i = Math.min(prices.length, i + step)
+  } while (td2 - td1 > 0)
   return prices.slice(-i)
 }
 
@@ -58,7 +59,7 @@ export function latestNPricesWithIndex(prices: number[], n?: number) {
     .map((e, i) => [i, e])
 }
 
-export function calculatePriceFluctuation(prices: number[], trendDirection: number) {
+export function calculatePriceSwing(prices: number[], trendDirection: number) {
   const currentPrice = prices[prices.length - 1]
   const previousPrice = trendDirection < 1 ? Math.min(...prices) : Math.max(...prices)
 

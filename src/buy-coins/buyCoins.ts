@@ -1,11 +1,35 @@
-import {CoinPrices} from 'node-binance-api'
-import {from, Observable, zip} from 'rxjs'
-import {map} from 'rxjs/operators'
-import {getConnection} from 'typeorm'
-import {binance, getBalanceForCoin} from '../binance/binance'
+import {BoughtCoin, CoinPrices} from 'node-binance-api'
+import {Observable, zip} from 'rxjs'
+import {map, mergeMap, tap} from 'rxjs/operators'
+import {getBalanceForCoin, getSymbolsWithPrices, marketBuy} from '../binance/binance'
 import {config} from '../config/config'
-import {Purchase} from '../entity/Purchase'
-import {findInvestmentCandidates, InvestmentCandidate} from '../find-coins/findCoins'
+import {Purchase} from '../db/entity/Purchase'
+import {save} from '../db/save'
+import {InvestmentCandidate} from '../find-coins/findInvestmentCandidates'
+
+type CoinPurchase = {
+  symbol: string
+  amount: number
+  buyPrice: number
+  sellPrice: number
+}
+
+export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
+  return zip(getFundsToInvest(), getSymbolsWithPrices()).pipe(
+    map(([fundsToInvest, coinPrices]) =>
+      calculateHowManyOfEachCoinsToBuy({
+        fundsToInvest,
+        coinsToBuy: investmentCandidates.map(e => e.symbol),
+        coinPrices
+      })
+    ),
+    mergeMap(it => zip(
+      Object.entries(it)
+        .map(([symbol, quantity]) => marketBuy(symbol, quantity)))
+    ),
+    map(it => it.map(bc => storePurchase(bc, investmentCandidates)))
+  )
+}
 
 export function calculateHowManyOfEachCoinsToBuy(args: {
   fundsToInvest: number,
@@ -26,17 +50,7 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
     })
     if (boughtCoins === 0) break
   }
-  // console.log('coinsToBuy', coinsToBuy)
   return coinsToBuy
-}
-
-export function findCoinsToBuy(): Observable<CoinPrices> {
-  return zip(getFundsToInvest(), findInvestmentCandidates(), getSymbolsWithPrices()).pipe(
-    map(([fundsToInvest, investmentCandidates, coinPrices]) => {
-      const coinsToBuy = investmentCandidates.map(e => e.symbol)
-      return calculateHowManyOfEachCoinsToBuy({fundsToInvest, coinsToBuy, coinPrices})
-    })
-  )
 }
 
 export function getFundsToInvest(): Observable<number> {
@@ -45,30 +59,15 @@ export function getFundsToInvest(): Observable<number> {
   )
 }
 
-export function getSymbolsWithPrices(): Observable<CoinPrices> {
-  return from(binance.prices())
-}
+function storePurchase(boughtCoin: BoughtCoin, investmentCandidates: InvestmentCandidate[]) {
+  const investmentCandidate = investmentCandidates.find((e) => e.symbol === boughtCoin.symbol)
+  if (!investmentCandidate) throw 'Could not find InvestmentCandidate'
 
-export function buyCoins(
-  symbolsToBuy: CoinPrices,
-  investmentCandidates: InvestmentCandidate[]
-) {
-
-  Object.entries(symbolsToBuy).forEach(([symbol, quantity]) => {
-    getConnection().transaction(async entityManager => {
-      const investmentCandidate = investmentCandidates.find((e) => e.symbol === symbol)
-      if (!investmentCandidate) throw 'Could not find InvestmentCandidate'
-
-      // const response = binance.marketBuy(symbol, quantity)
-      const response = {price: 100}
-      let purchase = new Purchase()
-      purchase.quantity = quantity
-      purchase.buy_price = Number(response.price)
-      purchase.buy_time = new Date()
-      purchase.symbol = symbol
-      purchase.sell_price = (investmentCandidate.maxPrice + investmentCandidate.minPrice) / 2
-      console.log(purchase, '########')
-      // entityManager.save(purchase)
-    })
-  })
+  let purchase = new Purchase()
+  purchase.symbol = boughtCoin.symbol
+  purchase.quantity = Number(boughtCoin.executedQty)
+  purchase.buyPrice = Number(boughtCoin.price)
+  purchase.sellPrice = (investmentCandidate.maxPrice + investmentCandidate.minPrice) / 2
+  purchase.buyTime = new Date()
+  return save(purchase)
 }

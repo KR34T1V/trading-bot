@@ -9,7 +9,7 @@ export const getAllSymbols = jest.fn()
 export const getHistoricPricesForSymbols = jest.fn()
   .mockImplementation((coin: string) => of(mockHistoricPrices))
 
-const symbols = ['ETHBTC', 'LTCBTC', 'BNBBTC', 'NEOBTC', 'QTUMETH', 'EOSETH']
+const mockSymbols = ['ETHBTC', 'LTCBTC', 'BNBBTC', 'NEOBTC', 'QTUMETH', 'EOSETH']
 export const mockHistoricPrices = [
   {
     symbol: 'ETHBTC',

@@ -1,6 +1,6 @@
 import {SymbolPrices} from '../binance/binance'
 import {
-  calculatePriceFluctuation, computeAverage,
+  calculatePriceSwing, computeAverage,
   detectDescendingTrend,
   excludeNonBTCSymbols,
   excludeSymbolsIfLatestPriceIsNotLowest,
@@ -77,30 +77,30 @@ describe(detectDescendingTrend, function () {
     0.00000559, 0.00000479, 0.00000457
   ]
   it('detects descending trend', function () {
-    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-10))
+    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-12))
   })
 })
 
 describe('calculatePriceFluctuation', function () {
   it('returns positive value on price increase', function () {
     const prices = [2, 4, 6]
-    expect(calculatePriceFluctuation(prices, 0)).toBe(200)
+    expect(calculatePriceSwing(prices, 0)).toBe(200)
   })
   it('returns negative value on price decrease', function () {
     const prices = [6, 4, 2]
-    expect(calculatePriceFluctuation(prices, 1.1)).toBe(-66.66666666666666)
+    expect(calculatePriceSwing(prices, 1.1)).toBe(-66.66666666666666)
   })
   it('returns zero when price is not changing', function () {
     const prices = [2, 2, 2, 2]
-    expect(calculatePriceFluctuation(prices, 0)).toBe(0)
+    expect(calculatePriceSwing(prices, 0)).toBe(0)
   })
   it('returns 0 when only one price', function () {
     const prices = [1]
-    expect(calculatePriceFluctuation(prices, 0)).toBe(0)
+    expect(calculatePriceSwing(prices, 0)).toBe(0)
   })
   it('should not fail with empty arr', function () {
     const prices: number[] = []
-    expect(calculatePriceFluctuation(prices, 0)).toBe(NaN)
+    expect(calculatePriceSwing(prices, 0)).toBe(NaN)
   })
 })
 

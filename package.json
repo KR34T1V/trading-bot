@@ -5,8 +5,8 @@
    "main": "index.ts",
    "scripts": {
       "check-ts": "yarn tsc --skipLibCheck --noEmit",
-      "test": "jest",
-      "start": "ts-node index.ts"
+      "test": "TRADING_BOT_ENV=test jest",
+      "start": "TRADING_BOT_ENV=live ts-node index.ts"
    },
    "author": "vrihlea@gmail.com",
    "license": "ISC",
@@ -14,8 +14,10 @@
       "@babel/preset-flow": "^7.10.4",
       "@types/node": "^14.6.4",
       "node-binance-api": "^0.11.11",
+      "reflect-metadata": "^0.1.10",
       "rxjs": "^6.6.3",
       "simple-statistics": "^7.1.0",
+      "sqlite3": "^4.0.3",
       "ts-jest": "^26.2.0",
       "ts-node": "^8.10.2",
       "typeorm": "0.2.25",
