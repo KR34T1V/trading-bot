@@ -1,15 +1,4 @@
-import {of} from 'rxjs'
-
-export const getBalanceForCoin = jest.fn()
-  .mockImplementation((coin: string) => of(0.5))
-
-export const getAllSymbols = jest.fn()
-  .mockImplementation((coin: string) => of(['ETHBTC', 'LTCBTC', 'BNBBTC', 'NEOBTC', 'QTUMETH', 'EOSETH']))
-
-export const getHistoricPricesForSymbols = jest.fn()
-  .mockImplementation((coin: string) => of(mockHistoricPrices))
-
-const mockSymbols = ['ETHBTC', 'LTCBTC', 'BNBBTC', 'NEOBTC', 'QTUMETH', 'EOSETH']
+export const mockSymbols = ['ETHBTC', 'LTCBTC', 'BNBBTC', 'NEOBTC', 'QTUMETH', 'EOSETH']
 export const mockHistoricPrices = [
   {
     symbol: 'ETHBTC',

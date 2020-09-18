@@ -8,10 +8,11 @@ declare module 'node-binance-api' {
     balance(): Promise<CoinPrices>
 
     prices(): Promise<CoinPrices>
-    marketBuy(symbol: string, quantity: number): Promise<BoughtCoin>
+    marketBuy(symbol: string, quantity: number): Promise<CoinOrder>
+    marketSell(symbol: string, quantity: number): Promise<CoinOrder>
   }
 
-  export type BoughtCoin = {
+  export type CoinOrder = {
     executedQty: string
     orderId: string
     symbol: string

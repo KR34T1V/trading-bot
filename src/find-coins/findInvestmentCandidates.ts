@@ -1,4 +1,4 @@
-import {map, switchMap} from 'rxjs/operators'
+import {map, mergeMap} from 'rxjs/operators'
 import {getAllSymbols, getHistoricPricesForSymbols} from '../binance/binance'
 import {config} from '../config/config'
 import {
@@ -22,11 +22,10 @@ export type InvestmentCandidate = {
 export function findInvestmentCandidates() {
   return getAllSymbols().pipe(
     map(excludeNonBTCSymbols),
-    switchMap(getHistoricPricesForSymbols),
+    mergeMap(getHistoricPricesForSymbols),
     map(excludeSymbolsIfLatestPriceIsNotLowest),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
     map(sortInvestPossibilityByPriceAscending)
-    // tap(it => console.log(it, 'findCoinsToBuy'))
   )
 }

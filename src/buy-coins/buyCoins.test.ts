@@ -1,7 +1,7 @@
+import {of} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
+import {config} from '../config/config'
 import {calculateHowManyOfEachCoinsToBuy, getFundsToInvest} from './buyCoins'
-
-jest.unmock('./buyCoins')
 
 describe(calculateHowManyOfEachCoinsToBuy, function () {
   it('returns how much to buy', function () {
@@ -51,9 +51,14 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
   })
 })
 
+jest.mock('../binance/binance', () => ({
+    getBalanceForCoin: jest.fn(() => of(0.5))
+  })
+)
+
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {
-    m.expect(getFundsToInvest()).toBeObservable('(a|)', {
+    m.expect(getFundsToInvest(config.percentToInvest)).toBeObservable('(a|)', {
       a: 0.25
     })
   }))

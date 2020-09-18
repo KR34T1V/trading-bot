@@ -5,3 +5,4 @@ build/
 tmp/
 temp/
 trading_bot_*
+yarn-error.log

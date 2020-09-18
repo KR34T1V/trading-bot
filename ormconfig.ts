@@ -1,4 +1,6 @@
-export const ormConfig = {
+import {ConnectionOptions} from 'typeorm/connection/ConnectionOptions'
+
+module.exports = {
   type: 'sqlite',
   database: `trading_bot_${process.env.TRADING_BOT_ENV}`,
   synchronize: true,
@@ -17,4 +19,4 @@ export const ormConfig = {
     migrationsDir: 'src/db/migration',
     subscribersDir: 'src/db/subscriber'
   }
-}
+} as ConnectionOptions

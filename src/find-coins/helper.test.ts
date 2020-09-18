@@ -7,9 +7,6 @@ import {
   excludeSymbolsWithTooLowPriceSwing, latestNPricesWithIndex
 } from './helper'
 
-jest.unmock('./helper')
-jest.unmock('simple-statistics')
-
 describe(excludeNonBTCSymbols.name, function () {
   it('removes non-BTC symbols', function () {
     const symbols = ['SKYETH', 'WTCBTC']

@@ -3,6 +3,10 @@ import {Sell} from './Sell'
 
 @Entity()
 export class Purchase {
+  public constructor(init?: Partial<Purchase>) {
+    Object.assign(this, init)
+  }
+
   @PrimaryGeneratedColumn()
   id!: number
 
@@ -21,11 +25,13 @@ export class Purchase {
   @Column('datetime')
   buyTime!: Date
 
-  @OneToOne(
-    type => Sell,
+  @OneToOne(type => Sell,
     sell => sell.purchase,
     {
-      nullable: true
+      onDelete: 'CASCADE',
+      nullable: true,
+      eager: true,
+      cascade: true
     }
   )
   @JoinColumn()

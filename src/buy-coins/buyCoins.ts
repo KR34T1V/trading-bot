@@ -1,10 +1,10 @@
-import {BoughtCoin, CoinPrices} from 'node-binance-api'
+import {CoinOrder, CoinPrices} from 'node-binance-api'
 import {Observable, zip} from 'rxjs'
 import {map, mergeMap, tap} from 'rxjs/operators'
-import {getBalanceForCoin, getSymbolsWithPrices, marketBuy} from '../binance/binance'
+import {getBalanceForCoin, getSymbolsWithPrices, buyAtMarketPrice} from '../binance/binance'
 import {config} from '../config/config'
 import {Purchase} from '../db/entity/Purchase'
-import {save} from '../db/save'
+import {dbSave} from '../db/dbSave'
 import {InvestmentCandidate} from '../find-coins/findInvestmentCandidates'
 
 type CoinPurchase = {
@@ -15,7 +15,7 @@ type CoinPurchase = {
 }
 
 export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
-  return zip(getFundsToInvest(), getSymbolsWithPrices()).pipe(
+  return zip(getFundsToInvest(config.percentToInvest), getSymbolsWithPrices()).pipe(
     map(([fundsToInvest, coinPrices]) =>
       calculateHowManyOfEachCoinsToBuy({
         fundsToInvest,
@@ -25,9 +25,9 @@ export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
     ),
     mergeMap(it => zip(
       Object.entries(it)
-        .map(([symbol, quantity]) => marketBuy(symbol, quantity)))
+        .map(([symbol, quantity]) => buyAtMarketPrice(symbol, quantity)))
     ),
-    map(it => it.map(bc => storePurchase(bc, investmentCandidates)))
+    mergeMap(it => zip(it.map(bc => storePurchase(bc, investmentCandidates))))
   )
 }
 
@@ -53,13 +53,13 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
   return coinsToBuy
 }
 
-export function getFundsToInvest(): Observable<number> {
+export function getFundsToInvest(percentToInvest: number): Observable<number> {
   return getBalanceForCoin(config.baseCurrency).pipe(
-    map(it => it * config.percentToInvest)
+    map(it => it * percentToInvest)
   )
 }
 
-function storePurchase(boughtCoin: BoughtCoin, investmentCandidates: InvestmentCandidate[]) {
+function storePurchase(boughtCoin: CoinOrder, investmentCandidates: InvestmentCandidate[]) {
   const investmentCandidate = investmentCandidates.find((e) => e.symbol === boughtCoin.symbol)
   if (!investmentCandidate) throw 'Could not find InvestmentCandidate'
 
@@ -69,5 +69,5 @@ function storePurchase(boughtCoin: BoughtCoin, investmentCandidates: InvestmentC
   purchase.buyPrice = Number(boughtCoin.price)
   purchase.sellPrice = (investmentCandidate.maxPrice + investmentCandidate.minPrice) / 2
   purchase.buyTime = new Date()
-  return save(purchase)
+  return dbSave(purchase)
 }
