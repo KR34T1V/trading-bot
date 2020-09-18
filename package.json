@@ -5,7 +5,7 @@
    "main": "index.ts",
    "scripts": {
       "check-ts": "yarn tsc --skipLibCheck --noEmit",
-      "test": "TRADING_BOT_ENV=test jest",
+      "test": "TRADING_BOT_ENV=test jest --runInBand",
       "start": "TRADING_BOT_ENV=live ts-node index.ts"
    },
    "author": "vrihlea@gmail.com",

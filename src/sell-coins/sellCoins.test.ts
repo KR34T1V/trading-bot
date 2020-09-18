@@ -1,16 +1,15 @@
-import {CoinPrices} from 'node-binance-api'
 import {of} from 'rxjs'
 import {getSymbolsWithPrices} from '../binance/binance'
 import {dbClear} from '../db/dbClear'
 import {dbSave} from '../db/dbSave'
-import {Purchase} from '../db/entity/Purchase'
-import {getBoughtCoins} from '../db/fetcher/getBoughtCoins'
+import {mockPurchase} from '../db/entity/Purchase.mock'
+import {getUnsoldCoins} from '../db/fetcher/getUnsoldCoins'
 import {findCoinsToSell, sellCoins} from './sellCoins'
 
-let purchase = new Purchase({
+const purchase = mockPurchase({
   buyTime: new Date,
   buyPrice: 0.1,
-  quantity: 2,
+  quantity: 1,
   symbol: 'ETHBTC',
   sellPrice: 0.2
 })
@@ -45,9 +44,9 @@ describe(sellCoins, function () {
 
   it('sells coin and stores sell-price', async done => {
     expect.assertions(1)
-    purchase = await dbSave(purchase).toPromise()
+    await dbSave(purchase).toPromise()
 
-    sellCoins(getBoughtCoins(), getSymbolsWithPrices()).subscribe(
+    sellCoins(getUnsoldCoins(), getSymbolsWithPrices()).subscribe(
       {
         next: (it) => {
           expect(it[0].sell.sellPrice).toBe(coinPrices['ETHBTC'])

@@ -1,16 +1,10 @@
 import {from} from 'rxjs'
 import {first} from 'rxjs/operators'
-import {getRepository, IsNull} from 'typeorm'
+import {getRepository} from 'typeorm'
 import {Purchase} from '../entity/Purchase'
 
 export function getBoughtCoins() {
   return from(
-    getRepository(Purchase).find({
-      where: {
-        sell: IsNull()
-      }
-    })
-  ).pipe(
-    first()
-  )
+    getRepository(Purchase).find()
+  ).pipe(first())
 }
