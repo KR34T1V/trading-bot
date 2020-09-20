@@ -1,5 +1,5 @@
 import {of} from 'rxjs'
-import {catchError, map, mergeMap, tap} from 'rxjs/operators'
+import {catchError, map, mergeMap, take, tap} from 'rxjs/operators'
 import {getAllSymbols, getHistoricPricesForSymbols} from '../binance/binance'
 import {config} from '../config/config'
 import {

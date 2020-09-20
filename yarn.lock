@@ -1165,6 +1165,11 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@types/asciichart@^1.5.3":
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/@types/asciichart/-/asciichart-1.5.3.tgz#9901b3576b6c0d0f2af4034ba83d9d9c26b207ec"
+  integrity sha512-fGefj/nbbyufvCwlT2tVMUCFPQIsDY4ATPGIxMKBYwzCByMjkycVJMHfZ2xsDCTThIiTPLXCo6IzE0R3PuM+5Q==
+
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.9"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.9.tgz#77e59d438522a6fb898fa43dc3455c6e72f3963d"
@@ -1451,6 +1456,11 @@ array-unique@^0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/array-unique/-/array-unique-0.3.2.tgz#a894b75d4bc4f6cd679ef3244a9fd8f46ae2d428"
   integrity sha1-qJS3XUvE9s1nnvMkSp/Y9Gri1Cg=
+
+asciichart@^1.5.25:
+  version "1.5.25"
+  resolved "https://registry.yarnpkg.com/asciichart/-/asciichart-1.5.25.tgz#f5aca189801b4e58019139bbb5922ab3cae3ca90"
+  integrity sha512-PNxzXIPPOtWq8T7bgzBtk9cI2lgS4SJZthUHEiQ1aoIc3lNzGfUvIvo9LiAnq26TACo9t1/4qP6KTGAUbzX9Xg==
 
 asn1@~0.2.3:
   version "0.2.4"

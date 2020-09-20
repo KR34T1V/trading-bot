@@ -8,6 +8,7 @@ import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
 import {findInvestmentCandidates} from './src/find-coins/findInvestmentCandidates'
 import {findCoinsToSell, sellCoins} from './src/sell-coins/sellCoins'
+import * as asciichart from 'asciichart'
 
 const args = yargs
   .usage('Usage: $0 --all')
@@ -19,7 +20,6 @@ const args = yargs
   })
   .help('help').alias('help', 'h')
   .argv
-
 
 initApp().then(() => {
   runApp()
@@ -35,10 +35,15 @@ function runApp() {
   )
 
   findInvestmentCandidates().pipe(
-    map(it => {
-      args.dryRun
-        ? console.log('coins to buy:', it)
-        : console.log('bought: ', buyCoins(it))
+    tap(it => {
+      if (args.dryRun) {
+        it.forEach(({symbol, prices, priceSwing}) => {
+          console.log(`${symbol}: ${priceSwing}`)
+          console.log(asciichart.plot(prices, {height: 10}))
+        })
+      } else {
+        console.log('bought: ', buyCoins(it))
+      }
     })
   ).subscribe({
     complete: () => console.log('done - finding/buying')
