@@ -4,11 +4,12 @@ export const config = {
     APIKEY: process.env.BINANCE_API_KEY,
     APISECRET: process.env.BINANCE_API_SECRET,
     historicData: { // fetch candlesticks data
-      interval: '1d',
-      limit: 60
+      interval: process.env.TRADING_BOT_HISTORIC_DATA_INTERVAL || '1d',
+      limit: Number(process.env.TRADING_BOT_HISTORIC_DATA_LIMIT) || 60
     }
   },
-  priceSwing: -10, // only buy if the price dropped low enough (in percent)
-  percentToInvest: 0.5, // how many percent to invest
-  descendingTrendSliceSize: 6 // based on how many ticks to detect the descending trend
+  priceSwing: Number(process.env.TRADING_BOT_PRICE_SWING) ||  -10, // only buy if the price dropped low enough (in percent)
+  percentToInvest: Number(process.env.TRADING_BOT_PERCENT_TO_INVEST) || 0.006, // how many percent to invest each run
+  detectDescendingSize: Number(process.env.TRADING_BOT_DETECT_DESCENDING_SIZE) || 6 // based on how many
+  // ticks to detect the descending trend
 }

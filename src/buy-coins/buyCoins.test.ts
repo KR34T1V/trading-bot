@@ -1,3 +1,4 @@
+import * as asciichart from 'asciichart'
 import {of} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
 import {config} from '../config/config'
@@ -59,7 +60,22 @@ jest.mock('../binance/binance', () => ({
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {
     m.expect(getFundsToInvest(config.percentToInvest)).toBeObservable('(a|)', {
-      a: 0.25
+      a: 0.003
     })
   }))
+})
+
+describe('config - buying coins', function () {
+  it('make sure the investemts are spread enough', function () {
+    let i = 0, amount = 12000, percent = 0.006
+    while (true) {
+      if (amount < 1000) {
+        break
+      }
+      amount -= amount * percent
+      i += 1
+    }
+    // console.log(i, amount)
+    expect(i > 365).toBeTruthy()
+  })
 })

@@ -39,7 +39,7 @@ export function buildInvestmentCandidates(s: SymbolPrices): InvestmentCandidate 
 }
 
 export function detectDescendingTrend(prices: number[]) {
-  let td1, td2, i = Math.min(prices.length, config.descendingTrendSliceSize)
+  let td1, td2, i = Math.min(prices.length, config.detectDescendingSize)
   let step = i
   do {
     td1 = computeAverage(prices.slice(-i, -i*2))
