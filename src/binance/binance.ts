@@ -1,6 +1,6 @@
 import Binance, {CoinOrder, CoinPrices, Tick} from 'node-binance-api'
-import {from, Observable} from 'rxjs'
-import {first, map} from 'rxjs/operators'
+import {from, Observable, of} from 'rxjs'
+import {catchError, first, map} from 'rxjs/operators'
 import {config} from '../config/config'
 
 export const binance = new Binance().options(config.binance)
@@ -40,8 +40,14 @@ export function getBalanceForCoin(symbol: string): Observable<number> {
   )
 }
 
-export function buyAtMarketPrice(symbol: string, quantity: number): Observable<CoinOrder> {
-  return from(binance.marketBuy(symbol, quantity)).pipe(first())
+export function buyAtMarketPrice(symbol: string, quantity: number): Observable<CoinOrder | undefined> {
+  return from(binance.marketBuy(symbol, quantity)).pipe(
+    first(),
+    catchError(err => {
+      console.error(`Could not buy coin: ${symbol} - ${quantity}`, err)
+      return of(undefined)
+    })
+  )
 }
 
 export function sellAtMarketPrice(symbol: string, quantity: number): Observable<CoinOrder> {

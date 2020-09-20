@@ -1,4 +1,4 @@
-import {of} from 'rxjs'
+import {of, throwError} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
 import {mockHistoricPrices, mockSymbols} from '../binance/binance.mock'
 import {findInvestmentCandidates, InvestmentCandidate} from './findInvestmentCandidates'
@@ -8,7 +8,9 @@ const coinPrices = {
 }
 
 jest.mock('../binance/binance', () => ({
-    getAllSymbols: jest.fn(() => of(mockSymbols)),
+    getAllSymbols: jest.fn()
+      .mockImplementationOnce(() => of(mockSymbols))
+      .mockImplementationOnce(() => throwError('some error')),
     getHistoricPricesForSymbols: jest.fn(() => of(mockHistoricPrices))
   })
 )
@@ -33,6 +35,14 @@ describe(findInvestmentCandidates, function () {
     }
     m.expect(findInvestmentCandidates()).toBeObservable('(a|)', {
       a: [mockInvestmentCandidate]
+    })
+  }))
+
+  it('returns empty array on error', marbles( m=> {
+    // @ts-ignore hide the error message
+    global.console = {error: jest.fn()}
+    m.expect(findInvestmentCandidates()).toBeObservable('(a|)', {
+      a: []
     })
   }))
 })

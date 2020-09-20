@@ -27,6 +27,7 @@ export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
       Object.entries(it)
         .map(([symbol, quantity]) => buyAtMarketPrice(symbol, quantity)))
     ),
+    map(it => it.filter((e): e is CoinOrder => e !== undefined)),
     mergeMap(it => zip(it.map(bc => storePurchase(bc, investmentCandidates))))
   )
 }

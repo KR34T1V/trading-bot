@@ -1,4 +1,5 @@
-import {map, mergeMap} from 'rxjs/operators'
+import {of} from 'rxjs'
+import {catchError, map, mergeMap, tap} from 'rxjs/operators'
 import {getAllSymbols, getHistoricPricesForSymbols} from '../binance/binance'
 import {config} from '../config/config'
 import {
@@ -26,6 +27,10 @@ export function findInvestmentCandidates() {
     map(excludeSymbolsIfLatestPriceIsNotLowest),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
-    map(sortInvestPossibilityByPriceAscending)
+    map(sortInvestPossibilityByPriceAscending),
+    catchError(err => {
+      console.error('Could not find coins', err)
+      return of([])
+    })
   )
 }
