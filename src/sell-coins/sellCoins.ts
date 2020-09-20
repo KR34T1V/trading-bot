@@ -1,18 +1,14 @@
 import {CoinOrder, CoinPrices} from 'node-binance-api'
-import {forkJoin, Observable, zip} from 'rxjs'
-import {map, mergeMap, tap} from 'rxjs/operators'
+import {forkJoin} from 'rxjs'
+import {map, mergeMap} from 'rxjs/operators'
 import {sellAtMarketPrice} from '../binance/binance'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
 import {Sell} from '../db/entity/Sell'
 
-export function sellCoins(boughtCoins: Observable<Purchase[]>, latestCoinPrices: Observable<CoinPrices>) {
-  return zip(boughtCoins, latestCoinPrices).pipe(
-    map(it => findCoinsToSell(...it)),
-    mergeMap(it => sellBoughtCoins(it).pipe(
-      map(soldCoins => ({boughtCoins: it, soldCoins}))
-      )
-    ),
+export function sellCoins(coinsToSell: Purchase[]) {
+  return sellBoughtCoins(coinsToSell).pipe(
+    map(soldCoins => ({boughtCoins: coinsToSell, soldCoins})),
     mergeMap((it) => markCoinsAsSold(it.boughtCoins, it.soldCoins))
   )
 }

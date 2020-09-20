@@ -44,9 +44,9 @@ describe(sellCoins, function () {
 
   it('sells coin and stores sell-price', async done => {
     expect.assertions(1)
-    await dbSave(purchase).toPromise()
+    const unsoldPurchase = await dbSave(purchase).toPromise()
 
-    sellCoins(getUnsoldCoins(), getSymbolsWithPrices()).subscribe(
+    sellCoins([unsoldPurchase]).subscribe(
       {
         next: (it) => {
           expect(it[0].sell.sellPrice).toBe(coinPrices['ETHBTC'])
