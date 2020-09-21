@@ -4,12 +4,22 @@ declare module 'node-binance-api' {
 
     candlesticks(symbol: string, interval: string, callback: any, options: Options): Promise<Tick[]>
 
-    account(): Promise<Account>
-    balance(): Promise<CoinPrices>
+    balance(): Promise<CoinBalances>
+    exchangeInfo(): Promise<ExchangeInfo>
 
     prices(): Promise<CoinPrices>
     marketBuy(symbol: string, quantity: number): Promise<CoinOrder>
     marketSell(symbol: string, quantity: number): Promise<CoinOrder>
+  }
+
+  export type ExchangeInfo = {
+    symbols: SymbolInfo[]
+  }
+
+  export type SymbolInfo = {
+    symbol: string
+    status: 'TRADING' | 'BREAK'
+    isSpotTradingAllowed: boolean
   }
 
   export type CoinOrder = {
@@ -17,6 +27,7 @@ declare module 'node-binance-api' {
     orderId: string
     symbol: string
     price: string
+    cummulativeQuoteQty: string
   }
 
   export type Options = {
@@ -26,13 +37,11 @@ declare module 'node-binance-api' {
   export type CoinPrices = {[k: string] : number}
 
   export type Balance = {
-    asset: string
-    free: string
+    available: string
+    onOrder: string
   }
 
-  export type Account = {
-    balances: Balance[]
-  }
+  export type CoinBalances = {[k: string] : Balance}
 
   export type Tick = [
     number, // Open time

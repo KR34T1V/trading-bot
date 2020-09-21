@@ -1,10 +1,10 @@
 import {CoinOrder, CoinPrices} from 'node-binance-api'
 import {Observable, zip} from 'rxjs'
 import {map, mergeMap, tap} from 'rxjs/operators'
-import {getBalanceForCoin, getSymbolsWithPrices, buyAtMarketPrice} from '../binance/binance'
+import {buyAtMarketPrice, getBalanceForCoin, getSymbolsWithPrices} from '../binance/binance'
 import {config} from '../config/config'
-import {Purchase} from '../db/entity/Purchase'
 import {dbSave} from '../db/dbSave'
+import {Purchase} from '../db/entity/Purchase'
 import {InvestmentCandidate} from '../find-coins/findInvestmentCandidates'
 
 type CoinPurchase = {
@@ -16,6 +16,7 @@ type CoinPurchase = {
 
 export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
   return zip(getFundsToInvest(config.percentToInvest), getSymbolsWithPrices()).pipe(
+    tap(it => {console.log('funds to invest: ', it[0])}),
     map(([fundsToInvest, coinPrices]) =>
       calculateHowManyOfEachCoinsToBuy({
         fundsToInvest,
@@ -24,11 +25,12 @@ export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
       })
     ),
     mergeMap(it => zip(
-      Object.entries(it)
-        .map(([symbol, quantity]) => buyAtMarketPrice(symbol, quantity)))
+      ...Object.entries(it)
+        .map(([symbol, quantity]) => buyAtMarketPrice(symbol, quantity))
+      )
     ),
     map(it => it.filter((e): e is CoinOrder => e !== undefined)),
-    mergeMap(it => zip(it.map(bc => storePurchase(bc, investmentCandidates))))
+    mergeMap(it => zip(...it.map(bc => storePurchase(bc, investmentCandidates))))
   )
 }
 
@@ -67,7 +69,7 @@ function storePurchase(boughtCoin: CoinOrder, investmentCandidates: InvestmentCa
   let purchase = new Purchase()
   purchase.symbol = boughtCoin.symbol
   purchase.quantity = Number(boughtCoin.executedQty)
-  purchase.buyPrice = Number(boughtCoin.price)
+  purchase.buyPrice = Number(boughtCoin.cummulativeQuoteQty)
   purchase.sellPrice = (investmentCandidate.maxPrice + investmentCandidate.minPrice) / 2
   purchase.buyTime = new Date()
   return dbSave(purchase)

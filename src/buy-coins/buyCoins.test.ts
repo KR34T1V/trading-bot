@@ -67,7 +67,7 @@ describe(getFundsToInvest, function () {
 
 describe('config - buying coins', function () {
   it('make sure the investemts are spread enough', function () {
-    let i = 0, amount = 12000, percent = 0.006
+    let i = 0, amount = 12000, percent = 0.01
     while (true) {
       if (amount < 1000) {
         break
@@ -76,6 +76,6 @@ describe('config - buying coins', function () {
       i += 1
     }
     // console.log(i, amount)
-    expect(i > 365).toBeTruthy()
+    expect(i > 200).toBeTruthy()
   })
 })

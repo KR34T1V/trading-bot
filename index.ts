@@ -1,3 +1,4 @@
+import * as asciichart from 'asciichart'
 import {zip} from 'rxjs'
 import {map, mergeMap, tap} from 'rxjs/operators'
 import yargs from 'yargs'
@@ -8,7 +9,6 @@ import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
 import {findInvestmentCandidates} from './src/find-coins/findInvestmentCandidates'
 import {findCoinsToSell, sellCoins} from './src/sell-coins/sellCoins'
-import * as asciichart from 'asciichart'
 
 const args = yargs
   .usage('Usage: $0 --all')
@@ -36,17 +36,15 @@ function runApp() {
 
   findInvestmentCandidates().pipe(
     tap(it => {
-      if (args.dryRun) {
-        it.forEach(({symbol, prices, priceSwing}) => {
-          console.log(`${symbol}: ${priceSwing}`)
-          console.log(asciichart.plot(prices, {height: 10}))
-        })
-      } else {
-        console.log('bought: ', buyCoins(it))
-      }
-    })
+      args.dryRun && it.forEach(({symbol, prices, priceSwing}) => {
+        console.log(`${symbol}: ${priceSwing}`)
+        console.log(asciichart.plot(prices, {height: 10}))
+      })
+    }),
+    mergeMap(it => args.dryRun ? [] : buyCoins(it)),
+    tap(it => {console.log(it, 'done - buying')})
   ).subscribe({
-    complete: () => console.log('done - finding/buying')
+    complete: () => console.log('done - finding')
   })
 
   zip(getUnsoldCoins(), getSymbolsWithPrices()).pipe(

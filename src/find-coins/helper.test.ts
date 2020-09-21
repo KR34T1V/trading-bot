@@ -74,7 +74,7 @@ describe(detectDescendingTrend, function () {
     0.00000559, 0.00000479, 0.00000457
   ]
   it('detects descending trend', function () {
-    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-12))
+    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-20))
   })
 })
 

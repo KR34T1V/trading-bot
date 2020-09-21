@@ -1,14 +1,15 @@
 import Binance, {CoinOrder, CoinPrices, Tick} from 'node-binance-api'
 import {from, Observable, of} from 'rxjs'
-import {catchError, first, map} from 'rxjs/operators'
+import {catchError, filter, first, map, tap} from 'rxjs/operators'
 import {config} from '../config/config'
 
 export const binance = new Binance().options(config.binance)
 
 export function getAllSymbols(): Observable<Array<string>> {
-  return from(binance.prices()).pipe(
+  return from(binance.exchangeInfo()).pipe(
     first(),
-    map(it => Object.keys(it))
+    map(it => it.symbols.filter(e => e.isSpotTradingAllowed && e.status === 'TRADING')),
+    map(it => it.map(e => e.symbol))
   )
 }
 
@@ -34,9 +35,9 @@ export function getTicksPrices(ticks: Tick[]): number[] {
 }
 
 export function getBalanceForCoin(symbol: string): Observable<number> {
-  return from(binance.account()).pipe(
+  return from(binance.balance()).pipe(
     first(),
-    map(it => Number(it.balances.find(b => b.free === config.baseCurrency)))
+    map(it => Number(it[config.baseCurrency].available))
   )
 }
 
