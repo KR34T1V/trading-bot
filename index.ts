@@ -34,7 +34,7 @@ function runApp() {
     it => console.log(it)
   )
 
-  findInvestmentCandidates().pipe(
+  findInvestmentCandidates({unsoldCoins: getUnsoldCoins()}).pipe(
     tap(it => {
       args.dryRun && it.forEach(({symbol, prices, priceSwing}) => {
         console.log(`${symbol}: ${priceSwing}`)

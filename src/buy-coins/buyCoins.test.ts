@@ -6,45 +6,67 @@ import {calculateHowManyOfEachCoinsToBuy, getFundsToInvest} from './buyCoins'
 
 describe(calculateHowManyOfEachCoinsToBuy, function () {
   it('returns how much to buy', function () {
-    const symbolsToBuy = ['a', 'b']
+    const symbolsToBuy = ['a', 'b', 'c']
+    const coinPrices = {
+      'a': 1,
+      'b': 5,
+      'c': 1,
+      'd': 1,
+    }
+    expect(calculateHowManyOfEachCoinsToBuy({
+      fundsToInvest: 7,
+      minOrderAmount: 3,
+      coinsToBuy: symbolsToBuy,
+      coinPrices
+    }))
+      .toEqual({
+        a: 3,
+        c: 3
+      })
+  })
+  it('does not overbuy', function () {
+    const symbolsToBuy = ['a', 'b', 'c']
     const coinPrices = {
       'a': 1,
       'b': 2,
       'c': 3
     }
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 6,
+      fundsToInvest: 15,
+      minOrderAmount: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
       .toEqual({
         a: 3,
-        b: 1
+        b: 2,
+        c: 1
       })
   })
   it('returns empty object if not enough funds', function () {
     const symbolsToBuy = ['a', 'b']
     const coinPrices = {
-      'a': 2,
-      'b': 2,
-      'c': 1
+      'a': 1,
+      'b': 3,
+      'c': 4
     }
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 1,
+      fundsToInvest: 2,
+      minOrderAmount: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
       .toEqual({})
   })
-  it('returns empty object if there are no symbols to buy', function () {
+  it('does not fail with unreal prices', function () {
     const symbolsToBuy: any = []
     const coinPrices = {
-      'a': 2,
-      'b': 2,
-      'c': 1
+      'a': 0,
+      'b': -1
     }
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 1,
+      fundsToInvest: 4,
+      minOrderAmount: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
@@ -60,7 +82,7 @@ jest.mock('../binance/binance', () => ({
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {
     m.expect(getFundsToInvest(config.percentToInvest)).toBeObservable('(a|)', {
-      a: 0.003
+      a: 0.004
     })
   }))
 })

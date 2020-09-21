@@ -3,9 +3,6 @@ import {marbles} from 'rxjs-marbles'
 import {mockHistoricPrices, mockSymbols} from '../binance/binance.mock'
 import {findInvestmentCandidates, InvestmentCandidate} from './findInvestmentCandidates'
 
-const coinPrices = {
-  'ETHBTC': 0.3
-}
 
 jest.mock('../binance/binance', () => ({
     getAllSymbols: jest.fn()
@@ -47,15 +44,15 @@ describe(findInvestmentCandidates, function () {
       priceSwing: -22.257053291536053,
       trendDirection: 1.1281112903225807
     }
-    m.expect(findInvestmentCandidates()).toBeObservable('(a|)', {
+    m.expect(findInvestmentCandidates({unsoldCoins: of([])})).toBeObservable('(a|)', {
       a: [mockInvestmentCandidate]
     })
   }))
 
-  it('returns empty array on error', marbles( m=> {
+  it('returns empty array on error', marbles(m => {
     // @ts-ignore hide the error message
     global.console = {error: jest.fn()}
-    m.expect(findInvestmentCandidates()).toBeObservable('(a|)', {
+    m.expect(findInvestmentCandidates({unsoldCoins: of([])})).toBeObservable('(a|)', {
       a: []
     })
   }))

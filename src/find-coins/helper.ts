@@ -1,18 +1,33 @@
+import {sortBy} from 'lodash'
 import {linearRegression} from 'simple-statistics'
 import {SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
+import {Purchase} from '../db/entity/Purchase'
 import {InvestmentCandidate} from './findInvestmentCandidates'
 
 export function excludeNonBTCSymbols(symbols: Array<string>): Array<string> {
   return symbols.filter(symbol => symbol.endsWith(config.baseCurrency))
 }
 
-export function sortInvestPossibilityByPriceAscending(ip: InvestmentCandidate[]) {
-  return ip.sort((a, b) => (
-    a.priceSwing > b.priceSwing)
-    ? 1
-    : -1
+type InvestmentCandidateWithBoughtAmount = InvestmentCandidate & {
+  boughtAmount: number
+}
+
+export function prioritizeWhatCoinsToBuy(
+  investmentCandidates: InvestmentCandidate[],
+  unsoldCoins: Purchase[]
+): InvestmentCandidate[] {
+  const investmentCandidatesWithAmount = investmentCandidates.map(ic => ({
+      ...ic,
+      boughtAmount: unsoldCoins.reduce((a, e) => ic.symbol === e.symbol ? a + e.buyPrice : a, 0)
+    } as InvestmentCandidateWithBoughtAmount)
   )
+
+  return sortBy(investmentCandidatesWithAmount, ['boughtAmount', 'minPrice'])
+    .map(e => {
+      delete e.boughtAmount
+      return e
+    })
 }
 
 export function excludeSymbolsIfLatestPriceIsNotLowest(sp: SymbolPrices[]) {
@@ -42,8 +57,8 @@ export function detectDescendingTrend(prices: number[]) {
   let td1, td2, i = Math.min(prices.length, config.detectDescendingSize)
   let step = i
   do {
-    td1 = computeAverage(prices.slice(-i, -i*2))
-    td2 = computeAverage(prices.slice(-i*2, -i*3))
+    td1 = computeAverage(prices.slice(-i, -i * 2))
+    td2 = computeAverage(prices.slice(-i * 2, -i * 3))
     i = Math.min(prices.length, i + step)
   } while (td2 - td1 > 0)
   return prices.slice(-i)

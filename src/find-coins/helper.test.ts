@@ -1,10 +1,15 @@
 import {SymbolPrices} from '../binance/binance'
+import {mockPurchase} from '../db/entity/Purchase.mock'
+import {InvestmentCandidate} from './findInvestmentCandidates'
 import {
-  calculatePriceSwing, computeAverage,
+  calculatePriceSwing,
+  computeAverage,
   detectDescendingTrend,
   excludeNonBTCSymbols,
   excludeSymbolsIfLatestPriceIsNotLowest,
-  excludeSymbolsWithTooLowPriceSwing, latestNPricesWithIndex
+  excludeSymbolsWithTooLowPriceSwing,
+  latestNPricesWithIndex,
+  prioritizeWhatCoinsToBuy
 } from './helper'
 
 describe(excludeNonBTCSymbols.name, function () {
@@ -17,9 +22,9 @@ describe(excludeNonBTCSymbols.name, function () {
 describe(excludeSymbolsIfLatestPriceIsNotLowest.name, function () {
   it('returns only symbols where latest price is lowest', function () {
     const symbolPrices: SymbolPrices[] = [
-      {symbol: 'SKYETH2', prices: [1,2,3]},
-      {symbol: 'SKYETH', prices: [3,2,1]},
-      {symbol: 'WTCBTC', prices: [1,2,1]},
+      {symbol: 'SKYETH2', prices: [1, 2, 3]},
+      {symbol: 'SKYETH', prices: [3, 2, 1]},
+      {symbol: 'WTCBTC', prices: [1, 2, 1]}
     ]
     expect(excludeSymbolsIfLatestPriceIsNotLowest(symbolPrices)).toEqual(symbolPrices.slice(-2))
   })
@@ -62,11 +67,11 @@ describe(excludeSymbolsWithTooLowPriceSwing, function () {
 
 describe(detectDescendingTrend, function () {
   const prices = [
-    0.00001302, 0.00001313,  0.0000133,
-    0.00001282,  0.0000123, 0.00001195,
+    0.00001302, 0.00001313, 0.0000133,
+    0.00001282, 0.0000123, 0.00001195,
     0.00001212, 0.00001157, 0.00001371,
     0.00001238, 0.00001208, 0.00001181,
-    0.00001176,  0.0000116, 0.00001187,
+    0.00001176, 0.0000116, 0.00001187,
     0.00001201, 0.00001201, 0.00001229,
     0.00001212, 0.00001204, 0.00001206,
     0.00001189, 0.00000815, 0.00000607,
@@ -103,18 +108,18 @@ describe('calculatePriceFluctuation', function () {
 
 describe('latestNPricesWithIndex', function () {
   it('returns n latest values', function () {
-    const arr = [1,2,3]
-    expect(latestNPricesWithIndex(arr, 2)).toEqual([[0,2], [1,3]])
+    const arr = [1, 2, 3]
+    expect(latestNPricesWithIndex(arr, 2)).toEqual([[0, 2], [1, 3]])
   })
   it('returns all elements when n is missing', function () {
-    const arr = [1,2]
-    expect(latestNPricesWithIndex(arr)).toEqual([[0,1], [1,2]])
+    const arr = [1, 2]
+    expect(latestNPricesWithIndex(arr)).toEqual([[0, 1], [1, 2]])
   })
 })
 
 describe('computeAverage', function () {
   it('returns average', function () {
-    expect(computeAverage([1,2,3])).toBe(2)
+    expect(computeAverage([1, 2, 3])).toBe(2)
   })
   it('returns the number provided when there is only one number', function () {
     expect(computeAverage([3])).toBe(3)
@@ -123,3 +128,36 @@ describe('computeAverage', function () {
     expect(computeAverage([])).toBe(0)
   })
 })
+
+describe(prioritizeWhatCoinsToBuy, function () {
+  it('prioritizes unbought coins', () => {
+    const ic = [
+      mockInvestementCandidate({symbol: 'BTCETH1', minPrice: 2}),
+      mockInvestementCandidate({symbol: 'BTCETH2', minPrice: 1}),
+      mockInvestementCandidate({symbol: 'BTCETH3', minPrice: 10}),
+      mockInvestementCandidate({symbol: 'BTCETH4', minPrice: 5})
+    ]
+    const unsoldCoins = [
+      mockPurchase({symbol: 'BTCETH1', buyPrice: 1}),
+      mockPurchase({symbol: 'BTCETH2', buyPrice: 2})
+    ]
+    expect(prioritizeWhatCoinsToBuy(ic, unsoldCoins)).toEqual([
+      mockInvestementCandidate({symbol: 'BTCETH4', minPrice: 5}),
+      mockInvestementCandidate({symbol: 'BTCETH3', minPrice: 10}),
+      mockInvestementCandidate({symbol: 'BTCETH1', minPrice: 2}),
+      mockInvestementCandidate({symbol: 'BTCETH2', minPrice: 1})
+    ])
+  })
+})
+
+function mockInvestementCandidate(init: Partial<InvestmentCandidate>): InvestmentCandidate {
+  return Object.assign({
+    symbol: 'BTCETH',
+    prices: [],
+    priceSwing: -10,
+    minPrice: 2,
+    maxPrice: 4,
+    slope: 0,
+    trendDirection: 0
+  }, init)
+}

@@ -20,6 +20,7 @@ export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
     map(([fundsToInvest, coinPrices]) =>
       calculateHowManyOfEachCoinsToBuy({
         fundsToInvest,
+        minOrderAmount: config.minOrderAmount,
         coinsToBuy: investmentCandidates.map(e => e.symbol),
         coinPrices
       })
@@ -36,23 +37,27 @@ export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
 
 export function calculateHowManyOfEachCoinsToBuy(args: {
   fundsToInvest: number,
+  minOrderAmount: number,
   coinsToBuy: string[],
   coinPrices: CoinPrices
 }): CoinPrices {
   let fundsLeft = args.fundsToInvest
   let coinsToBuy: {[k: string]: any} = {}
 
-  while (true) {
-    let boughtCoins = 0
-    args.coinsToBuy.forEach((symbol) => {
-      if (fundsLeft - args.coinPrices[symbol] > 0) {
-        coinsToBuy[symbol] = coinsToBuy[symbol] ? coinsToBuy[symbol] += 1 : 1
-        fundsLeft -= args.coinPrices[symbol]
-        boughtCoins += 1
+  args.coinsToBuy.forEach((symbol) => {
+    let quantity = 0
+    while (true) {
+      if (args.coinPrices[symbol] <= 0) break
+      if (fundsLeft - args.coinPrices[symbol] < 0 || quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
+        if (quantity * args.coinPrices[symbol] < args.minOrderAmount) break
+        coinsToBuy[symbol] = quantity
+        break
       }
-    })
-    if (boughtCoins === 0) break
-  }
+      quantity += 1
+      fundsLeft -= args.coinPrices[symbol]
+    }
+  })
+
   return coinsToBuy
 }
 
