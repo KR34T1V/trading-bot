@@ -18,7 +18,7 @@ describe(getInvestedAmount, function () {
     })).toPromise()
     await dbSave(mockPurchase({
       buyTime: new Date,
-      buyPrice: 0.2,
+      buyPrice: 0.4,
       quantity: 2,
       symbol: 'ETHBTC2',
       sellPrice: 0.4
