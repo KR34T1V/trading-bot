@@ -2,11 +2,12 @@
    "name": "trading-bot",
    "version": "1.0.0",
    "description": "",
-   "main": "index.ts",
+   "main": "buy.ts",
    "scripts": {
       "check-ts": "yarn tsc --skipLibCheck --noEmit",
       "test": "TRADING_BOT_ENV=test jest --runInBand",
-      "start": "TRADING_BOT_ENV=live ts-node --log-error index.ts"
+      "buy": "TRADING_BOT_ENV=live ts-node --log-error buy.ts",
+      "sell": "TRADING_BOT_ENV=live ts-node --log-error sell.ts"
    },
    "author": "vrihlea@gmail.com",
    "license": "ISC",

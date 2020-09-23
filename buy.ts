@@ -1,35 +1,25 @@
 import * as asciichart from 'asciichart'
-import {zip} from 'rxjs'
-import {map, mergeMap, tap} from 'rxjs/operators'
+import {mergeMap, tap} from 'rxjs/operators'
 import yargs from 'yargs'
-import {getSymbolsWithPrices} from './src/binance/binance'
 import {buyCoins} from './src/buy-coins/buyCoins'
 import {printReport} from './src/dashboard/dashboard'
 import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
 import {findInvestmentCandidates} from './src/find-coins/findInvestmentCandidates'
-import {findCoinsToSell, sellCoins} from './src/sell-coins/sellCoins'
 
 const args = yargs
-  .usage('Usage: $0 --all')
+  .usage('Usage: $0 --dryRun')
   .options({
     dryRun: {
       type: 'boolean',
-      description: 'Do not buy or sell, only find.'
+      description: 'Do not buy or sell, only find.',
+      alias: 'd'
     }
   })
   .help('help').alias('help', 'h')
   .argv
 
-initApp().then(() => {
-  runApp()
-})
-
-async function initApp() {
-  await dbConnect()
-}
-
-function runApp() {
+dbConnect().then(conn => {
   printReport().subscribe(
     it => console.log(it)
   )
@@ -46,15 +36,4 @@ function runApp() {
   ).subscribe({
     complete: () => console.log('done - finding')
   })
-
-  zip(getUnsoldCoins(), getSymbolsWithPrices()).pipe(
-    map(it => findCoinsToSell(...it)),
-    mergeMap(it => args.dryRun
-      ? it
-      : sellCoins(it)
-    ),
-    tap(it => console.log(it))
-  ).subscribe({
-    complete: () => console.log('done - selling')
-  })
-}
+})
