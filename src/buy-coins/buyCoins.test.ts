@@ -72,6 +72,28 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     }))
       .toEqual({})
   })
+  it('test with real data', function () {
+    // { 'PHBBTC': 417, 'SCBTC': 401, 'DOGEBTC': 401, 'XVGBTC': 257 }
+    const symbolsToBuy = ['SCBTC', 'DOGEBTC', 'XVGBTC', 'PHBBTC']
+    const coinPrices = {
+      XVGBTC: 3.9e-7,
+      PHBBTC: 2.3e-7,
+      DOGEBTC: 2.5e-7,
+      SCBTC: 2.5e-7
+    }
+    const expected = { "DOGEBTC": 408, "PHBBTC": 444, "SCBTC": 408, "XVGBTC": 262 }
+    // symbolsToBuy.forEach(s => {
+    // //  @ts-ignore
+      // console.log(s, coinPrices[s] * expected[s])
+    // })
+    expect(calculateHowManyOfEachCoinsToBuy({
+      fundsToInvest: 0.00057035592,
+      minOrderAmount: config.minOrderAmount,
+      coinsToBuy: symbolsToBuy,
+      coinPrices
+    }))
+      .toEqual(expected)
+  })
 })
 
 jest.mock('../binance/binance', () => ({

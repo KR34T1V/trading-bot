@@ -8,7 +8,7 @@ export const config = {
       limit: Number(process.env.TRADING_BOT_HISTORIC_DATA_LIMIT) || 60
     }
   },
-  minOrderAmount: 0.0001,
+  minOrderAmount: 0.000102,
   priceSwing: Number(process.env.TRADING_BOT_PRICE_SWING) || -10, // only buy if the price dropped low enough (in
   // percent)
   percentToInvest: Number(process.env.TRADING_BOT_PERCENT_TO_INVEST) || 0.008, // how many percent to invest each run
