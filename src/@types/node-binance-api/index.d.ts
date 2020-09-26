@@ -10,6 +10,7 @@ declare module 'node-binance-api' {
     prices(): Promise<CoinPrices>
     marketBuy(symbol: string, quantity: number): Promise<CoinOrder>
     marketSell(symbol: string, quantity: number): Promise<CoinOrder>
+    roundStep(amount: number, stepSize: string): number
   }
 
   export type ExchangeInfo = {
@@ -17,10 +18,18 @@ declare module 'node-binance-api' {
   }
 
   export type SymbolInfo = {
+    filters: Array<FilterType>
     symbol: string
     status: 'TRADING' | 'BREAK'
     isSpotTradingAllowed: boolean
   }
+
+  export type FilterType = {
+    filterType: 'LOT_SIZE' | 'MARKET_LOT_SIZE',
+    minQty: string,
+    maxQty: string,
+    stepSize: string
+  } // there are also other types
 
   export type CoinOrder = {
     executedQty: string

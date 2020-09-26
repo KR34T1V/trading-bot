@@ -5,16 +5,22 @@ import {Sell} from './Sell'
 export class Purchase {
   @PrimaryGeneratedColumn()
   id!: number
+
   @Column()
   symbol!: string
-  @Column()
+
+  @Column('double')
   quantity!: number
+
   @Column('double')
   buyPrice!: number
+
   @Column('double')
   sellPrice!: number
+
   @Column('datetime')
   buyTime!: Date
+
   @OneToOne(
     type => Sell,
     sell => sell.purchase,

@@ -1,9 +1,8 @@
+import {SymbolInfo} from 'node-binance-api'
 import {of} from 'rxjs'
-import {getSymbolsWithPrices} from '../binance/binance'
 import {dbClear} from '../db/dbClear'
 import {dbSave} from '../db/dbSave'
 import {mockPurchase} from '../db/entity/Purchase.mock'
-import {getUnsoldCoins} from '../db/fetcher/getUnsoldCoins'
 import {findCoinsToSell, sellCoins} from './sellCoins'
 
 const purchase = mockPurchase({
@@ -26,7 +25,8 @@ jest.mock('../binance/binance', () => ({
     ),
     getSymbolsWithPrices: jest.fn(
       () => of(coinPrices)
-    )
+    ),
+    roundStep: jest.fn(() => 1)
   })
 )
 
@@ -45,8 +45,17 @@ describe(sellCoins, function () {
   it('sells coin and stores sell-price', async done => {
     expect.assertions(1)
     const unsoldPurchase = await dbSave(purchase).toPromise()
+    const exchangeInfo = {
+      symbol: 'ETHBTC',
+      filters: [
+        {
+          stepSize: '1',
+          filterType: 'LOT_SIZE'
+        }
+      ]
+    } as SymbolInfo
 
-    sellCoins([unsoldPurchase]).subscribe(
+    sellCoins([unsoldPurchase], [exchangeInfo]).subscribe(
       {
         next: (it) => {
           expect(it[0].sell.sellPrice).toBe(coinPrices['ETHBTC'])

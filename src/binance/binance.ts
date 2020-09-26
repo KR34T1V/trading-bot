@@ -1,9 +1,22 @@
-import Binance, {CoinOrder, CoinPrices, Tick} from 'node-binance-api'
+import Binance, {CoinOrder, CoinPrices, ExchangeInfo, SymbolInfo, Tick} from 'node-binance-api'
 import {from, Observable, of} from 'rxjs'
-import {catchError, filter, first, map, tap} from 'rxjs/operators'
+import {catchError, first, map} from 'rxjs/operators'
 import {config} from '../config/config'
 
 export const binance = new Binance().options(config.binance)
+
+export function getExchangeInfo(): Observable<SymbolInfo[]> {
+  return from(binance.exchangeInfo()).pipe(
+    first(),
+    map(it => it.symbols)
+  )
+}
+
+export function roundStep(symbol: string, quantity: number, exchangeInfo: SymbolInfo[]): number {
+  const symbolInfo = exchangeInfo.find(e => e.symbol === symbol)
+  const stepSize = symbolInfo?.filters.find(e => e.filterType === 'LOT_SIZE')?.stepSize ?? ''
+  return binance.roundStep(quantity, stepSize)
+}
 
 export function getAllSymbols(): Observable<Array<string>> {
   return from(binance.exchangeInfo()).pipe(

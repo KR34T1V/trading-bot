@@ -1,13 +1,13 @@
-import {CoinOrder, CoinPrices} from 'node-binance-api'
+import {CoinOrder, CoinPrices, SymbolInfo} from 'node-binance-api'
 import {forkJoin} from 'rxjs'
 import {map, mergeMap} from 'rxjs/operators'
-import {sellAtMarketPrice} from '../binance/binance'
+import {binance, roundStep, sellAtMarketPrice} from '../binance/binance'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
 import {Sell} from '../db/entity/Sell'
 
-export function sellCoins(coinsToSell: Purchase[]) {
-  return sellBoughtCoins(coinsToSell).pipe(
+export function sellCoins(coinsToSell: Purchase[], exchangeInfo: SymbolInfo[]) {
+  return sellBoughtCoins(coinsToSell, exchangeInfo).pipe(
     map(soldCoins => ({boughtCoins: coinsToSell, soldCoins})),
     mergeMap((it) => markCoinsAsSold(it.boughtCoins, it.soldCoins))
   )
@@ -17,8 +17,11 @@ export function findCoinsToSell(boughtCoins: Purchase[], latestCoinPrices: CoinP
   return boughtCoins.filter(c => latestCoinPrices[c.symbol] > c.sellPrice)
 }
 
-export function sellBoughtCoins(boughtCoins: Purchase[]) {
-  return forkJoin(boughtCoins.map(c => sellAtMarketPrice(c.symbol, c.quantity)))
+export function sellBoughtCoins(boughtCoins: Purchase[], exchangeInfo: SymbolInfo[]) {
+  return forkJoin(boughtCoins.map(c => {
+    const amount = roundStep(c.symbol, c.quantity, exchangeInfo)
+    return sellAtMarketPrice(c.symbol, amount)
+  }))
 }
 
 export function markCoinsAsSold(boughtCoins: Purchase[], soldCoins: CoinOrder[]) {
@@ -26,7 +29,7 @@ export function markCoinsAsSold(boughtCoins: Purchase[], soldCoins: CoinOrder[])
     boughtCoins.map(bc => {
       const soldCoin = soldCoins.find(sc => sc.symbol === bc.symbol)
       const sell = new Sell()
-      sell.sellPrice = Number(soldCoin!.price)
+      sell.sellPrice = Number(soldCoin!.cummulativeQuoteQty)
       sell.sellTime = new Date
 
       bc.sell = sell
