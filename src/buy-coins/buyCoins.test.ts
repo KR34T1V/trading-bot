@@ -104,7 +104,7 @@ jest.mock('../binance/binance', () => ({
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {
     m.expect(getFundsToInvest(config.percentToInvest)).toBeObservable('(a|)', {
-      a: 0.004
+      a: 0.005
     })
   }))
 })

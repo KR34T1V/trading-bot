@@ -42,7 +42,7 @@ describe(getSoldAmount, function () {
 
     getSoldAmount().subscribe({
       next: it => {
-        expect(it).toBe(0.22 + 0.82)
+        expect(it).toBe(0.22 + 0.41)
       },
       complete: () => done()
     })
