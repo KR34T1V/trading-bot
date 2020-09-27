@@ -1,6 +1,6 @@
 import {CoinOrder, CoinPrices, SymbolInfo} from 'node-binance-api'
 import {forkJoin} from 'rxjs'
-import {map, mergeMap} from 'rxjs/operators'
+import {map, mergeMap, tap} from 'rxjs/operators'
 import {binance, roundStep, sellAtMarketPrice} from '../binance/binance'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'

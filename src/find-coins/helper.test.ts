@@ -130,22 +130,21 @@ describe('computeAverage', function () {
 })
 
 describe(prioritizeWhatCoinsToBuy, function () {
-  it('prioritizes unbought coins', () => {
+  it('prioritizes coins unbought and with biggest price swing', () => {
     const ic = [
-      mockInvestementCandidate({symbol: 'BTCETH1', minPrice: 2}),
-      mockInvestementCandidate({symbol: 'BTCETH2', minPrice: 1}),
-      mockInvestementCandidate({symbol: 'BTCETH3', minPrice: 10}),
-      mockInvestementCandidate({symbol: 'BTCETH4', minPrice: 5})
+      mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
+      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1}),
+      mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10}),
+      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5})
     ]
     const unsoldCoins = [
-      mockPurchase({symbol: 'BTCETH1', buyPrice: 1}),
-      mockPurchase({symbol: 'BTCETH2', buyPrice: 2})
+      mockPurchase({symbol: 'BTCETH3', buyPrice: 1})
     ]
     expect(prioritizeWhatCoinsToBuy(ic, unsoldCoins)).toEqual([
-      mockInvestementCandidate({symbol: 'BTCETH4', minPrice: 5}),
-      mockInvestementCandidate({symbol: 'BTCETH3', minPrice: 10}),
-      mockInvestementCandidate({symbol: 'BTCETH1', minPrice: 2}),
-      mockInvestementCandidate({symbol: 'BTCETH2', minPrice: 1})
+      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5}),
+      mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
+      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1}),
+      mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10})
     ])
   })
 })

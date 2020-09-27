@@ -1,4 +1,4 @@
-import {SymbolInfo} from 'node-binance-api'
+import {CoinOrder, SymbolInfo} from 'node-binance-api'
 import {of} from 'rxjs'
 import {dbClear} from '../db/dbClear'
 import {dbSave} from '../db/dbSave'
@@ -20,7 +20,8 @@ const coinPrices = {
 jest.mock('../binance/binance', () => ({
     sellAtMarketPrice: jest.fn(() => of({
         symbol: purchase.symbol,
-        price: 0.3
+        price: 0.3,
+        cummulativeQuoteQty: 0.5
       })
     ),
     getSymbolsWithPrices: jest.fn(
@@ -58,7 +59,7 @@ describe(sellCoins, function () {
     sellCoins([unsoldPurchase], [exchangeInfo]).subscribe(
       {
         next: (it) => {
-          expect(it[0].sell.sellPrice).toBe(coinPrices['ETHBTC'])
+          expect(it[0].sell.sellPrice).toBe(0.5)
         },
         complete: () => done()
       }

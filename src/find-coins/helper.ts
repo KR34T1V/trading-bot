@@ -1,4 +1,4 @@
-import {sortBy} from 'lodash'
+import {orderBy} from 'lodash'
 import {linearRegression} from 'simple-statistics'
 import {SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
@@ -23,7 +23,7 @@ export function prioritizeWhatCoinsToBuy(
     } as InvestmentCandidateWithBoughtAmount)
   )
 
-  return sortBy(investmentCandidatesWithAmount, ['boughtAmount', 'minPrice'])
+  return orderBy(investmentCandidatesWithAmount, ['boughtAmount', 'priceSwing'], ['asc', 'asc'])
     .map(e => {
       delete e.boughtAmount
       return e
