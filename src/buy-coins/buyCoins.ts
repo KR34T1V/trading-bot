@@ -73,7 +73,7 @@ function storePurchase(boughtCoin: CoinOrder, investmentCandidates: InvestmentCa
 
   let purchase = new Purchase()
   purchase.symbol = boughtCoin.symbol
-  purchase.quantity = Number(boughtCoin.executedQty)
+  purchase.quantity = Number(boughtCoin.executedQty) * config.fee
   purchase.buyPrice = Number(boughtCoin.cummulativeQuoteQty)
   purchase.sellPrice = (investmentCandidate.maxPrice + investmentCandidate.minPrice) / 2
   purchase.buyTime = new Date()
