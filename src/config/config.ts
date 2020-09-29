@@ -3,10 +3,11 @@ export const config = {
   binance: {
     APIKEY: process.env.BINANCE_API_KEY,
     APISECRET: process.env.BINANCE_API_SECRET,
-    historicData: { // fetch candlesticks data
-      interval: process.env.TRADING_BOT_HISTORIC_DATA_INTERVAL || '1d',
-      limit: Number(process.env.TRADING_BOT_HISTORIC_DATA_LIMIT) || 60
-    }
+    recvWindow: 60000,
+  },
+  historicData: { // fetch candlesticks data
+    interval: process.env.TRADING_BOT_HISTORIC_DATA_INTERVAL || '1d',
+    limit: Number(process.env.TRADING_BOT_HISTORIC_DATA_LIMIT) || 60
   },
   fee: 0.999,
   minOrderAmount: 0.000102,

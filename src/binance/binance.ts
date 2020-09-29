@@ -32,7 +32,7 @@ export function getHistoricPricesForSymbols(symbols: Array<string>): Observable<
   return from(
     Promise.all(
       symbols.map((s: string) => {
-        const {interval, limit} = config.binance.historicData
+        const {interval, limit} = config.historicData
         return binance.candlesticks(s, interval, false, {limit})
           .then((t: Tick[]) => ({
             symbol: s,
