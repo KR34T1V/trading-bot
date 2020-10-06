@@ -1,13 +1,9 @@
-import {forkJoin} from 'rxjs'
+import {Observable} from 'rxjs'
 import {map} from 'rxjs/operators'
-import {getInvestedAmount} from './getInvestedAmount'
-import {getSoldAmount} from './getSoldAmount'
+import {getSoldCoins} from '../db/fetcher/getSoldCoins'
 
-export function getProfits() {
-  return forkJoin([
-    getInvestedAmount(),
-    getSoldAmount()
-  ]).pipe(
-    map(([investedAmount, soldAmount]) => soldAmount - investedAmount)
+export function getProfits(): Observable<number> {
+  return getSoldCoins().pipe(
+    map(it => it.reduce((acc, v) => acc += v.sell.sellPrice - v.buyPrice, 0))
   )
 }
