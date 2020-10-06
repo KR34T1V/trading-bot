@@ -21,14 +21,14 @@ export type InvestmentCandidate = {
   priceSwing: number
 }
 
-export function findInvestmentCandidates(args: {unsoldCoins: Observable<Purchase[]>}) {
+export function findInvestmentCandidates(unsoldCoins: Observable<Purchase[]>) {
   return getAllSymbols().pipe(
     map(excludeNonBTCSymbols),
     mergeMap(it => getHistoricPricesForSymbols(it, config.historicData)),
     map(excludeSymbolsIfLatestPriceIsNotLowest),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
-    withLatestFrom(args.unsoldCoins),
+    withLatestFrom(unsoldCoins),
     map(it => prioritizeWhatCoinsToBuy(...it)),
     catchError(err => {
       console.error('Could not find coins', err)

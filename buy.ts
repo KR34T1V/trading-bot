@@ -24,7 +24,7 @@ dbConnect().then(conn => {
     it => console.log(it)
   )
 
-  findInvestmentCandidates({unsoldCoins: getUnsoldCoins()}).pipe(
+  findInvestmentCandidates(getUnsoldCoins()).pipe(
     tap(it => {
       args.dryRun && it.forEach(({symbol, prices, priceSwing}) => {
         console.log(`${symbol}: ${priceSwing}`)

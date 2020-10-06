@@ -1,4 +1,4 @@
-import Binance, {CoinOrder, CoinPrices, ExchangeInfo, SymbolInfo, Tick} from 'node-binance-api'
+import Binance, {CoinOrder, CoinPrices, SymbolInfo, Tick} from 'node-binance-api'
 import {from, Observable, of} from 'rxjs'
 import {catchError, first, map} from 'rxjs/operators'
 import {config} from '../config/config'

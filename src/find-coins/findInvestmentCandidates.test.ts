@@ -44,7 +44,7 @@ describe(findInvestmentCandidates, function () {
       priceSwing: -22.257053291536053,
       trendDirection: 1.1281112903225807
     }
-    m.expect(findInvestmentCandidates({unsoldCoins: of([])})).toBeObservable('(a|)', {
+    m.expect(findInvestmentCandidates(of([]))).toBeObservable('(a|)', {
       a: [mockInvestmentCandidate]
     })
   }))
@@ -52,7 +52,7 @@ describe(findInvestmentCandidates, function () {
   it('returns empty array on error', marbles(m => {
     // @ts-ignore hide the error message
     global.console = {error: jest.fn()}
-    m.expect(findInvestmentCandidates({unsoldCoins: of([])})).toBeObservable('(a|)', {
+    m.expect(findInvestmentCandidates(of([]))).toBeObservable('(a|)', {
       a: []
     })
   }))

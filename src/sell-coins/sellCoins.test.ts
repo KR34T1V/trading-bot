@@ -21,8 +21,10 @@ jest.mock('../binance/binance', () => ({
     sellAtMarketPrice: jest.fn(() => of({
         symbol: purchase.symbol,
         price: 0.3,
-        cummulativeQuoteQty: 0.5
-      })
+        cummulativeQuoteQty: '1',
+        fills: [{price: '0.3', qty: '1', commission: '0.1'}],
+        executedQty: '1'
+      } as CoinOrder)
     ),
     getSymbolsWithPrices: jest.fn(
       () => of(coinPrices)
@@ -59,7 +61,7 @@ describe(sellCoins, function () {
     sellCoins([unsoldPurchase], [exchangeInfo]).subscribe(
       {
         next: (it) => {
-          expect(it[0].sell.sellPrice).toBe(0.5)
+          expect(it[0].sell.sellPrice).toBe(0.19999999999999998)
         },
         complete: () => done()
       }

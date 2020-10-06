@@ -1,7 +1,7 @@
 import {readJSON, readJSONSync} from 'fs-extra'
 import {CoinOrder, ExchangeInfo, FillOrder} from 'node-binance-api'
 import {from, Observable, of, zip} from 'rxjs'
-import {map, mergeMap, tap} from 'rxjs/operators'
+import {map, mergeMap} from 'rxjs/operators'
 import {getExchangeInfo, getSymbolsWithPrices, SymbolPrices} from '../binance/binance'
 import {buyCoins} from '../buy-coins/buyCoins'
 import {config} from '../config/config'
@@ -86,11 +86,11 @@ jest.mock('../binance/binance', () => {
   }
 )
 
-describe('Simulated trading', function () {
+describe.skip('Simulated trading', function () {
   it('shows results', async done => {
     for (; CURRENT_DAY < TOTAL_DAYS; CURRENT_DAY++) {
       console.log(`CURRENT_DAY: ${CURRENT_DAY} - ${BTC_BALANCE}`)
-      await findInvestmentCandidates({unsoldCoins: getUnsoldCoins()}).pipe(
+      await findInvestmentCandidates(getUnsoldCoins()).pipe(
         // tap(it => {console.log(it, 'done - find')}),
         mergeMap(it => buyCoins(it))
       ).toPromise()

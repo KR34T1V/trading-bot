@@ -1,4 +1,3 @@
-import * as asciichart from 'asciichart'
 import {of} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
 import {config} from '../config/config'
@@ -11,7 +10,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       'a': 1,
       'b': 5,
       'c': 1,
-      'd': 1,
+      'd': 1
     }
     expect(calculateHowManyOfEachCoinsToBuy({
       fundsToInvest: 7,
@@ -73,7 +72,6 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       .toEqual({})
   })
   it('test with real data', function () {
-    // { 'PHBBTC': 417, 'SCBTC': 401, 'DOGEBTC': 401, 'XVGBTC': 257 }
     const symbolsToBuy = ['SCBTC', 'DOGEBTC', 'XVGBTC', 'PHBBTC']
     const coinPrices = {
       XVGBTC: 3.9e-7,
@@ -81,11 +79,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       DOGEBTC: 2.5e-7,
       SCBTC: 2.5e-7
     }
-    const expected = { "DOGEBTC": 408, "PHBBTC": 444, "SCBTC": 408, "XVGBTC": 262 }
-    // symbolsToBuy.forEach(s => {
-    // //  @ts-ignore
-      // console.log(s, coinPrices[s] * expected[s])
-    // })
+    const expected = {'DOGEBTC': 801, 'SCBTC': 801}
     expect(calculateHowManyOfEachCoinsToBuy({
       fundsToInvest: 0.00057035592,
       minOrderAmount: config.minOrderAmount,
@@ -104,7 +98,7 @@ jest.mock('../binance/binance', () => ({
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {
     m.expect(getFundsToInvest(config.percentToInvest)).toBeObservable('(a|)', {
-      a: 0.005
+      a: 0.025
     })
   }))
 })

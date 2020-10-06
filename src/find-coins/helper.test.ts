@@ -141,10 +141,10 @@ describe(prioritizeWhatCoinsToBuy, function () {
       mockPurchase({symbol: 'BTCETH3', buyPrice: 1})
     ]
     expect(prioritizeWhatCoinsToBuy(ic, unsoldCoins)).toEqual([
-      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5}),
-      mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
+      mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10}),
       mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1}),
-      mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10})
+      mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
+      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5})
     ])
   })
 })
