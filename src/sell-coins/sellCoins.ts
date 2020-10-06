@@ -29,7 +29,9 @@ export function markCoinsAsSold(boughtCoins: Purchase[], soldCoins: CoinOrder[])
     boughtCoins.map(bc => {
       const soldCoin = soldCoins.find(sc => sc.symbol === bc.symbol)
       const sell = new Sell()
-      sell.sellPrice = Number(soldCoin!.cummulativeQuoteQty)
+      sell.sellPrice = soldCoin!.fills.reduce((acc, v) =>
+        acc += (Number(v.price) * Number(v.qty)) - Number(v.commission)
+        , 0)
       sell.sellTime = new Date
 
       bc.sell = sell

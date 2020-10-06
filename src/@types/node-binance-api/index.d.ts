@@ -33,10 +33,15 @@ declare module 'node-binance-api' {
 
   export type CoinOrder = {
     executedQty: string
-    orderId: string
     symbol: string
-    price: string
     cummulativeQuoteQty: string
+    fills: FillOrder[]
+  }
+
+  export type FillOrder = {
+    price: string
+    qty: string
+    commission: string
   }
 
   export type Options = {

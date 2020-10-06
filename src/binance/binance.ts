@@ -28,12 +28,14 @@ export function getAllSymbols(): Observable<Array<string>> {
 
 export type SymbolPrices = {symbol: string, prices: Array<number>}
 
-export function getHistoricPricesForSymbols(symbols: Array<string>): Observable<SymbolPrices[]> {
+export function getHistoricPricesForSymbols(
+  symbols: Array<string>,
+  historicData: typeof config.historicData
+): Observable<SymbolPrices[]> {
   return from(
     Promise.all(
       symbols.map((s: string) => {
-        const {interval, limit} = config.historicData
-        return binance.candlesticks(s, interval, false, {limit})
+        return binance.candlesticks(s, historicData.interval, false, {limit: historicData.limit})
           .then((t: Tick[]) => ({
             symbol: s,
             prices: getTicksPrices(t)

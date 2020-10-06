@@ -5,6 +5,8 @@
    "main": "buy.ts",
    "scripts": {
       "check-ts": "yarn tsc --skipLibCheck --noEmit",
+      "simulate-trading": "TRADING_BOT_ENV=simulate NODE_OPTIONS=--max_old_space_size=8192 jest simulate --runInBand",
+      "fetch-simulation-data": "TRADING_BOT_ENV=simulate ts-node --log-error fetchSimulationData.ts",
       "test": "TRADING_BOT_ENV=test jest --runInBand",
       "buy": "TRADING_BOT_ENV=live ts-node --log-error buy.ts",
       "sell": "TRADING_BOT_ENV=live ts-node --log-error sell.ts"
@@ -14,10 +16,12 @@
    "dependencies": {
       "@babel/preset-flow": "^7.10.4",
       "@types/asciichart": "^1.5.3",
+      "@types/fs-extra": "^9.0.1",
       "@types/lodash": "^4.14.161",
       "@types/node": "^14.6.4",
       "@types/yargs": "^15.0.5",
       "asciichart": "^1.5.25",
+      "fs-extra": "^9.0.1",
       "lodash": "^4.17.20",
       "node-binance-api": "^0.11.11",
       "reflect-metadata": "^0.1.10",

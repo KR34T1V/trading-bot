@@ -75,7 +75,7 @@ function storePurchase(boughtCoin: CoinOrder, investmentCandidates: InvestmentCa
   purchase.symbol = boughtCoin.symbol
   purchase.quantity = Number(boughtCoin.executedQty) * config.fee
   purchase.buyPrice = Number(boughtCoin.cummulativeQuoteQty)
-  purchase.sellPrice = (investmentCandidate.maxPrice + investmentCandidate.minPrice) / 2
+  purchase.sellPrice = (investmentCandidate.maxPrice * 2) - (investmentCandidate.minPrice * 0.9)
   purchase.buyTime = new Date()
   return dbSave(purchase)
 }
