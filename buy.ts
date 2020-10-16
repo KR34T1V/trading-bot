@@ -28,7 +28,10 @@ dbConnect().then(conn => {
     tap(it => {
       args.dryRun && it.forEach(({symbol, prices, priceSwing}) => {
         console.log(`${symbol}: ${priceSwing}`)
-        console.log(asciichart.plot(prices, {height: 10}))
+        console.log(asciichart.plot(prices, {
+          height: 10,
+          format: x => x.toFixed(8)
+        }))
       })
     }),
     mergeMap(it => args.dryRun ? [] : buyCoins(it)),
