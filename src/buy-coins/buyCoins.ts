@@ -45,16 +45,22 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
   let coinsToBuy: {[k: string]: any} = {}
 
   args.coinsToBuy.forEach((symbol) => {
+    if (args.coinPrices[symbol] <= 0) return // to avoid infinite loops in case of bad data
     let quantity = 0
+
     while (true) {
-      if (args.coinPrices[symbol] <= 0) break
-      if (fundsLeft - args.coinPrices[symbol] < 0 || quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
-        if (quantity * args.coinPrices[symbol] < args.minOrderAmount) break
-        coinsToBuy[symbol] = quantity
-        break
-      }
+      if (fundsLeft - args.coinPrices[symbol] < 0
+        || quantity * args.coinPrices[symbol] >= args.minOrderAmount
+      ) break
+
       quantity += 1
       fundsLeft -= args.coinPrices[symbol]
+    }
+
+    if (quantity > 1 && quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
+      coinsToBuy[symbol] = quantity
+    } else {
+      fundsLeft += args.coinPrices[symbol] * quantity
     }
   })
 

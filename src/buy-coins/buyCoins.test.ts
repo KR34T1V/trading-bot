@@ -24,23 +24,24 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       })
   })
   it('does not overbuy', function () {
-    const symbolsToBuy = ['a', 'b', 'c']
+    const symbolsToBuy = ['a', 'b', 'c', 'd']
     const coinPrices = {
       'a': 1,
       'b': 2,
-      'c': 3
+      'c': 2,
+      'd': 1
     }
+
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 15,
+      fundsToInvest: 13,
       minOrderAmount: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
-    }))
-      .toEqual({
-        a: 3,
-        b: 2,
-        c: 1
-      })
+    })).toEqual({
+      a: 3,
+      b: 2,
+      c: 2
+    })
   })
   it('returns empty object if not enough funds', function () {
     const symbolsToBuy = ['a', 'b']
