@@ -9,7 +9,8 @@
       "fetch-simulation-data": "TRADING_BOT_ENV=simulate ts-node --log-error fetchSimulationData.ts",
       "test": "TRADING_BOT_ENV=test jest --runInBand",
       "buy": "TRADING_BOT_ENV=live ts-node --log-error buy.ts",
-      "sell": "TRADING_BOT_ENV=live ts-node --log-error sell.ts"
+      "sell": "TRADING_BOT_ENV=live ts-node --log-error sell.ts",
+      "dashboard": "TRADING_BOT_ENV=live ts-node --log-error dashboard.ts"
    },
    "author": "vrihlea@gmail.com",
    "license": "ISC",

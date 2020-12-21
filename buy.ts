@@ -20,10 +20,6 @@ const args = yargs
   .argv
 
 dbConnect().then(conn => {
-  printReport().subscribe(
-    it => console.log(it)
-  )
-
   findInvestmentCandidates(getUnsoldCoins()).pipe(
     tap(it => {
       args.dryRun && it.forEach(({symbol, prices, priceSwing}) => {

@@ -6,6 +6,7 @@ import {printReport} from './src/dashboard/dashboard'
 import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
 import {findCoinsToSell, sellCoins} from './src/sell-coins/sellCoins'
+import { sortBy } from 'lodash'
 
 const args = yargs
   .usage('Usage: $0 --dryRun')
@@ -20,15 +21,24 @@ const args = yargs
   .argv
 
 dbConnect().then(conn => {
-  zip(getUnsoldCoins(), getSymbolsWithPrices(), getExchangeInfo()).pipe(
-    mergeMap(([unsoldCoins, symbolsWithPrices, exchangeInfo]) => {
-      const coinsToSell = findCoinsToSell(unsoldCoins, symbolsWithPrices)
-      return args.dryRun
-        ? coinsToSell
-        : sellCoins(coinsToSell, exchangeInfo)
+  printReport().subscribe(
+    it => console.log(it)
+  )
+
+  zip(getSymbolsWithPrices(), getUnsoldCoins()).pipe(
+    map(([prices, coins]) => {
+      const sellCandidates = coins.map(c => {
+        const buyPrice = c.buyPrice / c.quantity
+        return {
+          id: c.id,
+          symbol: c.symbol,
+          buyPrice,
+          currentPrice: prices[c.symbol],
+          profit: (prices[c.symbol] - buyPrice) / buyPrice
+        }
+      })
+      return sortBy(sellCandidates, ['profit']).slice(-5)
     }),
-    tap(it => console.log(it))
-  ).subscribe({
-    complete: () => console.log('done - selling')
-  })
+    tap(it => it.forEach(e => console.log(e)))
+  ).subscribe()
 })
