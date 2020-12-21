@@ -1,7 +1,8 @@
 import {CoinOrder, CoinPrices, SymbolInfo} from 'node-binance-api'
 import {forkJoin} from 'rxjs'
-import {map, mergeMap, tap} from 'rxjs/operators'
-import {binance, roundStep, sellAtMarketPrice} from '../binance/binance'
+import {map, mergeMap} from 'rxjs/operators'
+import {roundStep, sellAtMarketPrice} from '../binance/binance'
+import {config} from '../config/config'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
 import {Sell} from '../db/entity/Sell'
@@ -14,7 +15,10 @@ export function sellCoins(coinsToSell: Purchase[], exchangeInfo: SymbolInfo[]) {
 }
 
 export function findCoinsToSell(boughtCoins: Purchase[], latestCoinPrices: CoinPrices) {
-  return boughtCoins.filter(c => latestCoinPrices[c.symbol] > c.sellPrice)
+  return boughtCoins.filter(c => {
+    const buyPrice = c.buyPrice / c.quantity
+    return (latestCoinPrices[c.symbol] - buyPrice) / buyPrice > config.sellPercent
+  })
 }
 
 export function sellBoughtCoins(boughtCoins: Purchase[], exchangeInfo: SymbolInfo[]) {
@@ -30,7 +34,7 @@ export function markCoinsAsSold(boughtCoins: Purchase[], soldCoins: CoinOrder[])
       const soldCoin = soldCoins.find(sc => sc.symbol === bc.symbol)
       const sell = new Sell()
       sell.sellPrice = soldCoin!.fills.reduce((acc, v) =>
-        acc += (Number(v.price) * Number(v.qty)) - Number(v.commission)
+          acc += (Number(v.price) * Number(v.qty)) - Number(v.commission)
         , 0)
       sell.sellTime = new Date
 
