@@ -57,7 +57,7 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
       fundsLeft -= args.coinPrices[symbol]
     }
 
-    if (quantity > 1 && quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
+    if (quantity > 9 && quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
       coinsToBuy[symbol] = quantity
     } else {
       fundsLeft += args.coinPrices[symbol] * quantity
@@ -81,7 +81,7 @@ function storePurchase(boughtCoin: CoinOrder, investmentCandidates: InvestmentCa
   purchase.symbol = boughtCoin.symbol
   purchase.quantity = Number(boughtCoin.executedQty) * config.fee
   purchase.buyPrice = Number(boughtCoin.cummulativeQuoteQty)
-  purchase.sellPrice = (investmentCandidate.maxPrice * 2) - (investmentCandidate.minPrice * 0.9)
+  purchase.sellPrice = (investmentCandidate.maxPrice * 2) - (investmentCandidate.minPrice)
   purchase.buyTime = new Date()
   return dbSave(purchase)
 }
