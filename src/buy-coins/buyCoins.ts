@@ -49,18 +49,21 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
     let quantity = 0
 
     while (true) {
-      if (fundsLeft - args.coinPrices[symbol] < 0
-        || quantity * args.coinPrices[symbol] >= args.minOrderAmount
-      ) break
+      if (fundsLeft < 0) {
+        fundsLeft += quantity * args.coinPrices[symbol]
+        break
+      }
+
+      if (quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
+        coinsToBuy[symbol] = quantity
+        // avoid checking other coins if not enough funds
+        if (fundsLeft < args.minOrderAmount) return coinsToBuy
+        // check next coin
+        break
+      }
 
       quantity += 1
       fundsLeft -= args.coinPrices[symbol]
-    }
-
-    if (quantity > 9 && quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
-      coinsToBuy[symbol] = quantity
-    } else {
-      fundsLeft += args.coinPrices[symbol] * quantity
     }
   })
 

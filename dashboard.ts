@@ -32,8 +32,8 @@ dbConnect().then(conn => {
         return {
           id: c.id,
           symbol: c.symbol,
-          buyPrice,
-          currentPrice: prices[c.symbol],
+          buyPrice: buyPrice.toExponential(),
+          currentPrice: Number(prices[c.symbol]).toExponential(),
           profit: (prices[c.symbol] - buyPrice) / buyPrice
         }
       })

@@ -83,7 +83,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     const expected = {'DOGEBTC': 801, 'SCBTC': 801}
     expect(calculateHowManyOfEachCoinsToBuy({
       fundsToInvest: 0.00057035592,
-      minOrderAmount: config.minOrderAmount,
+      minOrderAmount: 0.0002,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))

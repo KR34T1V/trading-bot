@@ -1,4 +1,5 @@
 import {SymbolPrices} from '../binance/binance'
+import {config} from '../config/config'
 import {mockPurchase} from '../db/entity/Purchase.mock'
 import {InvestmentCandidate} from './findInvestmentCandidates'
 import {
@@ -79,7 +80,7 @@ describe(detectDescendingTrend, function () {
     0.00000559, 0.00000479, 0.00000457
   ]
   it('detects descending trend', function () {
-    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-20))
+    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-(config.detectDescendingSize * 2)))
   })
 })
 
@@ -142,9 +143,9 @@ describe(prioritizeWhatCoinsToBuy, function () {
     ]
     expect(prioritizeWhatCoinsToBuy(ic, unsoldCoins)).toEqual([
       mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10}),
-      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1}),
+      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5}),
       mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
-      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5})
+      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1}),
     ])
   })
 })
