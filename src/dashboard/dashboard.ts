@@ -21,8 +21,9 @@ function getDashBoard(
   profits: number
 ) {
   return `
-Balance: ${balance}
+B + I:    ${balance + invested}
+Balance:  ${balance}
 Invested: ${invested}
-Profits: ${profits}
+Profits:  ${profits}
 `
 }
