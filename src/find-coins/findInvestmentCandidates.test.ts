@@ -1,7 +1,8 @@
 import {of, throwError} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
+import {SymbolPrices} from '../binance/binance'
 import {mockHistoricPrices, mockSymbols} from '../binance/binance.mock'
-import {findInvestmentCandidates, InvestmentCandidate} from './findInvestmentCandidates'
+import {excludeSymbolsWithLowPrices, findInvestmentCandidates, InvestmentCandidate} from './findInvestmentCandidates'
 
 jest.mock('../binance/binance', () => ({
     getAllSymbols: jest.fn()
@@ -42,4 +43,15 @@ describe(findInvestmentCandidates, function () {
       a: []
     })
   }))
+})
+
+describe(excludeSymbolsWithLowPrices, function () {
+  it('excludes symbols if the price is too low', function () {
+    const symbolPrices: SymbolPrices[] = [
+      {symbol: 'SKYETH2', prices: [0.00000001]},
+      {symbol: 'SKYETH', prices: [0.000000011]},
+      {symbol: 'WTCBTC', prices: [0.00000009]}
+    ]
+    expect(excludeSymbolsWithLowPrices(symbolPrices)).toEqual([symbolPrices[symbolPrices.length - 1]])
+  })
 })
