@@ -10,7 +10,8 @@
       "test": "TRADING_BOT_ENV=test jest --runInBand",
       "buy": "TRADING_BOT_ENV=live ts-node --log-error buy.ts",
       "sell": "TRADING_BOT_ENV=live ts-node --log-error sell.ts",
-      "dashboard": "clear && TRADING_BOT_ENV=live ts-node --log-error dashboard.ts"
+      "dashboard": "clear && TRADING_BOT_ENV=live ts-node --log-error dashboard.ts",
+      "live-trading": "TRADING_BOT_ENV=live ts-node --log-error live-trading.ts"
    },
    "author": "vrihlea@gmail.com",
    "license": "ISC",
@@ -20,11 +21,13 @@
       "@types/fs-extra": "^9.0.1",
       "@types/lodash": "^4.14.161",
       "@types/node": "^14.6.4",
+      "@types/node-schedule": "^1.3.1",
       "@types/yargs": "^15.0.5",
       "asciichart": "^1.5.25",
       "fs-extra": "^9.0.1",
       "lodash": "^4.17.20",
       "node-binance-api": "^0.11.11",
+      "node-schedule": "^1.3.2",
       "reflect-metadata": "^0.1.10",
       "rxjs": "^6.6.3",
       "simple-statistics": "^7.1.0",

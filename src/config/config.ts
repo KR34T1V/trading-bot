@@ -11,10 +11,10 @@ export const config = {
   },
   sellPercent: 0.18,
   fee: 0.999,
-  minOrderAmount: 0.00013,
-  priceSwing: Number(process.env.TRADING_BOT_PRICE_SWING) || -40, // only buy if the price dropped low enough (in
+  minOrderAmount: 0.000125,
+  priceSwing: Number(process.env.TRADING_BOT_PRICE_SWING) || -30, // only buy if the price dropped low enough (in
   // percent)
-  percentToInvest: Number(process.env.TRADING_BOT_PERCENT_TO_INVEST) || 0.05, // how many percent to invest each run
+  percentToInvest: Number(process.env.TRADING_BOT_PERCENT_TO_INVEST) || 0.04, // how many percent to invest each run
   detectDescendingSize: Number(process.env.TRADING_BOT_DETECT_DESCENDING_SIZE) || 7 // based on how many
   // ticks to detect the descending trend
 }
