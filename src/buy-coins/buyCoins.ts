@@ -7,13 +7,6 @@ import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
 import {InvestmentCandidate} from '../find-coins/findInvestmentCandidates'
 
-type CoinPurchase = {
-  symbol: string
-  amount: number
-  buyPrice: number
-  sellPrice: number
-}
-
 export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
   return zip(getFundsToInvest(config.percentToInvest), getSymbolsWithPrices()).pipe(
     tap(it => {console.log('funds to invest: ', it[0])}),
@@ -84,7 +77,6 @@ function storePurchase(boughtCoin: CoinOrder, investmentCandidates: InvestmentCa
   purchase.symbol = boughtCoin.symbol
   purchase.quantity = Number(boughtCoin.executedQty) * config.fee
   purchase.buyPrice = Number(boughtCoin.cummulativeQuoteQty)
-  purchase.sellPrice = (investmentCandidate.maxPrice * 2) - (investmentCandidate.minPrice)
   purchase.buyTime = new Date()
   return dbSave(purchase)
 }

@@ -15,7 +15,6 @@ describe(getSoldAmount, function () {
       buyPrice: 0.1,
       quantity: 1,
       symbol: 'ETHBTC',
-      sellPrice: 0.2,
       sell: mockSell({
         sellTime: new Date(),
         sellPrice: 0.22
@@ -26,7 +25,6 @@ describe(getSoldAmount, function () {
       buyPrice: 0.2,
       quantity: 2,
       symbol: 'ETHBTC2',
-      sellPrice: 0.4,
       sell: mockSell({
         sellTime: new Date(),
         sellPrice: 0.41
@@ -37,7 +35,6 @@ describe(getSoldAmount, function () {
       buyPrice: 0.2,
       quantity: 2,
       symbol: 'ETHBTC3',
-      sellPrice: 0.4
     })).toPromise()
 
     getSoldAmount().subscribe({

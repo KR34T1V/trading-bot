@@ -15,9 +15,6 @@ export class Purchase {
   @Column('double')
   buyPrice!: number
 
-  @Column('double')
-  sellPrice!: number
-
   @Column('datetime')
   buyTime!: Date
 

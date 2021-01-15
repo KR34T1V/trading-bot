@@ -10,7 +10,6 @@ const purchase = mockPurchase({
   buyPrice: 0.1,
   quantity: 1,
   symbol: 'ETHBTC',
-  sellPrice: 0.3
 })
 
 const purchase2 = mockPurchase({
@@ -18,7 +17,6 @@ const purchase2 = mockPurchase({
   buyPrice: 0.12,
   quantity: 1,
   symbol: 'ETHBTC',
-  sellPrice: 0.2
 })
 
 const coinPrices = {
