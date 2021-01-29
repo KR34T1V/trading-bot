@@ -37,5 +37,5 @@ Profits:  ${convertToUSD(profits, btcPrice)}
 }
 
 function convertToUSD(amount: number, btcPrice: number) {
-  return amount * btcPrice
+  return `${amount.toFixed(5)}  ${(amount * btcPrice).toFixed(1)}$`
 }
