@@ -7,7 +7,6 @@ import {
   computeAverage,
   detectDescendingTrend,
   excludeNonBTCSymbols,
-  excludeSymbolsIfLatestPriceIsNotLowest,
   excludeSymbolsWithTooLowPriceSwing,
   latestNPricesWithIndex,
   prioritizeWhatCoinsToBuy
@@ -17,17 +16,6 @@ describe(excludeNonBTCSymbols.name, function () {
   it('removes non-BTC symbols', function () {
     const symbols = ['SKYETH', 'WTCBTC']
     expect(excludeNonBTCSymbols(symbols)).toEqual(['WTCBTC'])
-  })
-})
-
-describe(excludeSymbolsIfLatestPriceIsNotLowest.name, function () {
-  it('returns only symbols where latest price is lowest', function () {
-    const symbolPrices: SymbolPrices[] = [
-      {symbol: 'SKYETH2', prices: [1, 2, 3]},
-      {symbol: 'SKYETH', prices: [3, 2, 1]},
-      {symbol: 'WTCBTC', prices: [1, 2, 1]}
-    ]
-    expect(excludeSymbolsIfLatestPriceIsNotLowest(symbolPrices)).toEqual(symbolPrices.slice(-2))
   })
 })
 

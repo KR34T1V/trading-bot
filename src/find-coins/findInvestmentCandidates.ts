@@ -1,12 +1,11 @@
 import {Observable, of} from 'rxjs'
-import {catchError, map, mergeMap, tap, withLatestFrom} from 'rxjs/operators'
+import {catchError, map, mergeMap, withLatestFrom} from 'rxjs/operators'
 import {getAllSymbols, getHistoricPricesForSymbols, SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
 import {Purchase} from '../db/entity/Purchase'
 import {
   buildInvestmentCandidates,
   excludeNonBTCSymbols,
-  excludeSymbolsIfLatestPriceIsNotLowest,
   excludeSymbolsWithTooLowPriceSwing,
   prioritizeWhatCoinsToBuy
 } from './helper'
@@ -25,7 +24,6 @@ export function findInvestmentCandidates(unsoldCoins: Observable<Purchase[]>) {
   return getAllSymbols().pipe(
     map(excludeNonBTCSymbols),
     mergeMap(it => getHistoricPricesForSymbols(it, config.historicData)),
-    map(excludeSymbolsIfLatestPriceIsNotLowest),
     map(excludeSymbolsWithLowPrices),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
