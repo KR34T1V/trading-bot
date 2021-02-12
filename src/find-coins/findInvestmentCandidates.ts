@@ -37,5 +37,5 @@ export function findInvestmentCandidates(unsoldCoins: Observable<Purchase[]>) {
 }
 
 export function excludeSymbolsWithLowPrices(sp: SymbolPrices[]) {
-  return sp.filter(e => e.prices[e.prices.length - 1] >= 0.00000009)
+  return sp.filter(e => e.prices[e.prices.length - 1] > 0.00000013)
 }

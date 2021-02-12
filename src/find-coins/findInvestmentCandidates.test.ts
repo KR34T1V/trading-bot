@@ -48,10 +48,10 @@ describe(findInvestmentCandidates, function () {
 describe(excludeSymbolsWithLowPrices, function () {
   it('excludes symbols if the price is too low', function () {
     const symbolPrices: SymbolPrices[] = [
-      {symbol: 'SKYETH2', prices: [0.00000001]},
-      {symbol: 'SKYETH', prices: [0.000000011]},
-      {symbol: 'WTCBTC', prices: [0.00000009]}
+      {symbol: 'SKYETH2', prices: [0.00000014]},
+      {symbol: 'SKYETH', prices: [0.00000013]},
+      {symbol: 'WTCBTC', prices: [0.00000012]}
     ]
-    expect(excludeSymbolsWithLowPrices(symbolPrices)).toEqual([symbolPrices[symbolPrices.length - 1]])
+    expect(excludeSymbolsWithLowPrices(symbolPrices)).toEqual([symbolPrices[0]])
   })
 })
