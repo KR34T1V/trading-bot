@@ -13,6 +13,3 @@ https://www.binance.com/en/support/articles/360002502072
 # Selling
 - `yarn sell`
 - or if you want only to show what'll be sold without selling `yarn sell -d` 
-
-# TODO:
-- automatically decrease/increase `sellPercent` when `account balance` gets low
