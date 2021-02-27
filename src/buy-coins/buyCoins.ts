@@ -13,7 +13,7 @@ export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
     map(([fundsToInvest, coinPrices]) =>
       calculateHowManyOfEachCoinsToBuy({
         fundsToInvest,
-        minOrderAmount: config.minOrderAmount,
+        minOrderPrice: config.minOrderAmount,
         coinsToBuy: investmentCandidates.map(e => e.symbol),
         coinPrices
       })
@@ -30,7 +30,7 @@ export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
 
 export function calculateHowManyOfEachCoinsToBuy(args: {
   fundsToInvest: number,
-  minOrderAmount: number,
+  minOrderPrice: number,
   coinsToBuy: string[],
   coinPrices: CoinPrices
 }): CoinPrices {
@@ -47,10 +47,15 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
         break
       }
 
-      if (quantity * args.coinPrices[symbol] >= args.minOrderAmount) {
+      if (quantity * args.coinPrices[symbol] >= args.minOrderPrice) {
+        // ignore expensive coins
+        if (quantity < 12) {
+          fundsLeft += args.coinPrices[symbol] * quantity
+          break
+        }
         coinsToBuy[symbol] = quantity
         // avoid checking other coins if not enough funds
-        if (fundsLeft < args.minOrderAmount) return coinsToBuy
+        if (fundsLeft < args.minOrderPrice) return coinsToBuy
         // check next coin
         break
       }

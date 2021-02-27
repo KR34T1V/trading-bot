@@ -8,19 +8,19 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     const symbolsToBuy = ['a', 'b', 'c']
     const coinPrices = {
       'a': 1,
-      'b': 5,
+      'b': 3,
       'c': 1,
       'd': 1
     }
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 7,
-      minOrderAmount: 3,
+      fundsToInvest: 25,
+      minOrderPrice: 12,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
       .toEqual({
-        a: 3,
-        c: 3
+        a: 12,
+        c: 12
       })
   })
   it('does not overbuy', function () {
@@ -33,14 +33,13 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     }
 
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 13,
-      minOrderAmount: 3,
+      fundsToInvest: 12 + 24 + 4,
+      minOrderPrice: 12,
       coinsToBuy: symbolsToBuy,
       coinPrices
     })).toEqual({
-      a: 3,
-      b: 2,
-      c: 2
+      a: 12,
+      d: 12
     })
   })
   it('returns empty object if not enough funds', function () {
@@ -52,7 +51,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     }
     expect(calculateHowManyOfEachCoinsToBuy({
       fundsToInvest: 2,
-      minOrderAmount: 3,
+      minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
@@ -66,7 +65,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     }
     expect(calculateHowManyOfEachCoinsToBuy({
       fundsToInvest: 4,
-      minOrderAmount: 3,
+      minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
@@ -83,7 +82,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     const expected = {'DOGEBTC': 801, 'SCBTC': 801}
     expect(calculateHowManyOfEachCoinsToBuy({
       fundsToInvest: 0.00057035592,
-      minOrderAmount: 0.0002,
+      minOrderPrice: 0.0002,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
@@ -99,22 +98,7 @@ jest.mock('../binance/binance', () => ({
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {
     m.expect(getFundsToInvest(config.percentToInvest)).toBeObservable('(a|)', {
-      a: 0.02
+      a: 0.03
     })
   }))
-})
-
-describe('config - buying coins', function () {
-  it('make sure the investemts are spread enough', function () {
-    let i = 0, amount = 12000, percent = 0.01
-    while (true) {
-      if (amount < 1000) {
-        break
-      }
-      amount -= amount * percent
-      i += 1
-    }
-    // console.log(i, amount)
-    expect(i > 200).toBeTruthy()
-  })
 })
