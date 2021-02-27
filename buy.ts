@@ -18,11 +18,11 @@ const args = yargs
   .help('help').alias('help', 'h')
   .argv
 
-dbConnect().then(conn => {
+dbConnect().then(_ => {
   findInvestmentCandidates(getUnsoldCoins()).pipe(
     tap(it => {
       args.dryRun && it.forEach(({symbol, prices, priceSwing}) => {
-        console.log(`${symbol}: ${priceSwing}`)
+        console.log(`${symbol}: ${priceSwing}: ${prices.length}`)
         console.log(asciichart.plot(prices, {
           height: 10,
           format: x => x.toFixed(8)
