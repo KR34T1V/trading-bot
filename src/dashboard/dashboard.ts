@@ -1,7 +1,7 @@
 import {CoinPrices} from 'node-binance-api'
 import {forkJoin} from 'rxjs'
 import {map} from 'rxjs/operators'
-import {getBalanceForCoin, getSymbolsWithPrices, SymbolPrices} from '../binance/binance'
+import {getAccountBalance, getBalanceForCoin, getSymbolsWithPrices} from '../binance/binance'
 import {config} from '../config/config'
 import {getAdjustedPrices} from './getAdjustedAmount'
 import {getInvestedAmount} from './getInvestedAmount'
@@ -11,7 +11,7 @@ export function printReport() {
   return forkJoin([
     getBalanceForCoin(config.baseCurrency),
     getInvestedAmount(),
-    getAdjustedPrices(),
+    getAdjustedPrices(getSymbolsWithPrices(), getAccountBalance()),
     getProfits(),
     getSymbolsWithPrices()
   ]).pipe(
@@ -31,7 +31,7 @@ function getDashBoard(
 B + I:    ${convertToUSD(balance + invested, btcPrice)}
 Balance:  ${convertToUSD(balance, btcPrice)}
 Invested: ${convertToUSD(invested, btcPrice)}
-Adjusted: ${convertToUSD(balance + adjusted, btcPrice)}
+Adjusted: ${convertToUSD(adjusted, btcPrice)}
 Profits:  ${convertToUSD(profits, btcPrice)}
 `
 }

@@ -1,12 +1,11 @@
+import {sortBy} from 'lodash'
 import {zip} from 'rxjs'
-import {combineAll, map, mergeMap, tap, withLatestFrom} from 'rxjs/operators'
+import {map, tap} from 'rxjs/operators'
 import yargs from 'yargs'
-import {binance, getExchangeInfo, getSymbolsWithPrices} from './src/binance/binance'
+import {getPreviousDayTradeStatus, getSymbolsWithPrices} from './src/binance/binance'
 import {printReport} from './src/dashboard/dashboard'
 import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
-import {findCoinsToSell, sellCoins} from './src/sell-coins/sellCoins'
-import { sortBy } from 'lodash'
 
 const args = yargs
   .usage('Usage: $0 --dryRun')
@@ -25,8 +24,8 @@ dbConnect().then(conn => {
     it => console.log(it)
   )
 
-  zip(getSymbolsWithPrices(), getUnsoldCoins()).pipe(
-    map(([prices, coins]) => {
+  zip(getSymbolsWithPrices(), getUnsoldCoins(), getPreviousDayTradeStatus()).pipe(
+    map(([prices, coins, prevDayStatus]) => {
       const sellCandidates = coins.map(c => {
         const buyPrice = c.buyPrice / c.quantity
         return {
@@ -34,6 +33,7 @@ dbConnect().then(conn => {
           symbol: c.symbol,
           buyPrice: buyPrice.toExponential(),
           currentPrice: Number(prices[c.symbol]).toExponential(),
+          '24Change': prevDayStatus.find(e => e.symbol === c.symbol)?.priceChangePercent,
           profit: (prices[c.symbol] - buyPrice) / buyPrice
         }
       })
