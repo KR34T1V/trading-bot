@@ -1,4 +1,4 @@
-import {SymbolPrices} from '../binance/binance'
+import {of} from 'rxjs'
 import {config} from '../config/config'
 import {mockPurchase} from '../db/entity/Purchase.mock'
 import {InvestmentCandidate} from './findInvestmentCandidates'
@@ -55,20 +55,44 @@ describe(excludeSymbolsWithTooLowPriceSwing, function () {
 })
 
 describe(detectDescendingTrend, function () {
-  const prices = [
-    0.00001302, 0.00001313, 0.0000133,
-    0.00001282, 0.0000123, 0.00001195,
-    0.00001212, 0.00001157, 0.00001371,
-    0.00001238, 0.00001208, 0.00001181,
-    0.00001176, 0.0000116, 0.00001187,
-    0.00001201, 0.00001201, 0.00001229,
-    0.00001212, 0.00001204, 0.00001206,
-    0.00001189, 0.00000815, 0.00000607,
-    0.00000567, 0.00000688, 0.00000574,
-    0.00000559, 0.00000479, 0.00000457
-  ]
   it('detects descending trend', function () {
+    const prices = [
+      0.00001302, 0.00001313, 0.0000133,
+      0.00001282, 0.0000123, 0.00001195,
+      0.00001212, 0.00001157, 0.00001371,
+      0.00001238, 0.00001208, 0.00001181,
+      0.00001176, 0.0000116, 0.00001187,
+      0.00001201, 0.00001201, 0.00001229,
+      0.00001212, 0.00001204, 0.00001206,
+      0.00001189, 0.00000815, 0.00000607,
+      0.00000567, 0.00000688, 0.00000574,
+      0.00000559, 0.00000479, 0.00000457
+    ]
     expect(detectDescendingTrend(prices)).toEqual(prices.slice(-(config.detectDescendingSize * 2)))
+  })
+
+  it.only('AGIBTC - 21.02.21', function () {
+    const prices = [
+      0.00000215, 0.00000216, 0.00000215, 0.00000232, 0.00000231,
+      0.0000024, 0.00000258, 0.00000242, 0.00000232, 0.00000232,
+      0.00000234, 0.0000023, 0.00000235, 0.00000228, 0.00000229,
+      0.00000226, 0.00000239, 0.00000247, 0.00000229, 0.00000243,
+      0.00000226, 0.00000219, 0.00000215, 0.00000221, 0.00000213,
+      0.00000206, 0.00000209, 0.00000206, 0.00000246, 0.0000024,
+      0.00000237, 0.00000244, 0.00000243, 0.00000242, 0.0000024,
+      0.00000254, 0.00000289, 0.00000271, 0.00000252, 0.00000261,
+      0.00000274, 0.00000265, 0.00000279, 0.00000256, 0.00000237,
+      0.00000243, 0.00000248, 0.00000244, 0.00000261, 0.0000026,
+      0.00000254, 0.00000258, 0.00000289, 0.00000283, 0.00000304,
+      0.00000274, 0.00000268, 0.00000291, 0.00000319, 0.00000351,
+      0.00000357, 0.00000389, 0.00000388, 0.00000409, 0.00000478,
+      0.00000614, 0.00000613, 0.00000487, 0.00000505, 0.00000486,
+      0.00000464, 0.0000047, 0.0000043, 0.00000439, 0.00000426,
+      0.0000039, 0.00000371, 0.00000384, 0.00000371, 0.00000409,
+      0.00000402, 0.00000372, 0.00000375, 0.00000374, 0.00000348,
+      0.00000388, 0.00000351, 0.00000345, 0.00000342, 0.00000346
+    ]
+    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-config.detectDescendingSize * 3))
   })
 })
 
@@ -129,11 +153,11 @@ describe(prioritizeWhatCoinsToBuy, function () {
     const unsoldCoins = [
       mockPurchase({symbol: 'BTCETH3', buyPrice: 1})
     ]
-    expect(prioritizeWhatCoinsToBuy(ic, unsoldCoins)).toEqual([
+    expect(prioritizeWhatCoinsToBuy(ic, of(unsoldCoins))).toEqual([
       mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10}),
       mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5}),
       mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
-      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1}),
+      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1})
     ])
   })
 })

@@ -1,6 +1,7 @@
-import {CoinOrder, CoinPrices, SymbolInfo} from 'node-binance-api'
+import {CoinOrder, SymbolInfo, CoinPrices} from 'node-binance-api'
 import {forkJoin, Observable, zip} from 'rxjs'
-import {mergeMap, tap} from 'rxjs/operators'
+import {mergeMap} from 'rxjs/operators'
+import {PreviousDayResult} from 'node-binance-api'
 import {roundStep, sellAtMarketPrice} from '../binance/binance'
 import {config} from '../config/config'
 import {dbSave} from '../db/dbSave'
@@ -12,14 +13,27 @@ export function sellCoins(coinsToSell: Purchase[], exchangeInfo: SymbolInfo[]) {
     const amount = roundStep(c.symbol, c.quantity, exchangeInfo)
     return sellAtMarketPrice(c.symbol, amount)
   })).pipe(
-    mergeMap(soldCoins => zip(...markCoinAsSold(coinsToSell, soldCoins))),
+    mergeMap(soldCoins => zip(...markCoinAsSold(coinsToSell, soldCoins)))
   )
 }
 
-export function findCoinsToSell(boughtCoins: Purchase[], latestCoinPrices: CoinPrices) {
-  return boughtCoins.filter(c => {
-    const buyPrice = c.buyPrice / c.quantity
-    return (latestCoinPrices[c.symbol] - buyPrice) / buyPrice > config.sellPercent
+export function findCoinsToSell(
+  boughtCoins: Purchase[],
+  previousDayTradeStatus: PreviousDayResult[],
+  latestCoinPrices: CoinPrices
+) {
+  return boughtCoins.filter(e => {
+    const latestPrice = latestCoinPrices[e.symbol]
+    const buyPrice = e.buyPrice / e.quantity
+    const priceGrowth = (latestPrice - buyPrice) / buyPrice
+    const prevDayStatus = previousDayTradeStatus.find(a => a.symbol === e.symbol)
+    if (!prevDayStatus) throw Error('Could not find symbol with prices')
+
+    if( Number(prevDayStatus.priceChangePercent) > 12) {
+      return priceGrowth > 0.32
+    } else {
+      return priceGrowth > config.sellPercent
+    }
   })
 }
 

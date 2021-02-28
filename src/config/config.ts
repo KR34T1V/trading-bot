@@ -6,13 +6,13 @@ export const config = {
     recvWindow: 60000,
   },
   historicData: { // fetch candlesticks data
-    interval: '3d',
-    limit: 30
+    interval: '8h',
+    limit: 90
   },
-  sellPercent: 0.15,
+  sellPercent: 0.14,
   fee: 0.999,
   minOrderAmount: 0.00015,
-  priceSwing: -20, // only buy if the price dropped low enough (in percent)
-  percentToInvest: 0.07, // how many percent to invest each run
-  detectDescendingSize: 4 // based on how many ticks to detect the descending trend
+  priceSwing: -15, // only buy if the price dropped low enough (in percent)
+  percentToInvest: 0.06, // how many percent to invest each run
+  detectDescendingSize: 8 // based on how many ticks to detect the descending trend
 }

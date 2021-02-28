@@ -2,7 +2,7 @@ import {readJSON, readJSONSync} from 'fs-extra'
 import {CoinOrder, ExchangeInfo, FillOrder} from 'node-binance-api'
 import {from, Observable, of, zip} from 'rxjs'
 import {map, mergeMap} from 'rxjs/operators'
-import {getExchangeInfo, getSymbolsWithPrices, SymbolPrices} from '../binance/binance'
+import {getExchangeInfo, getPreviousDayTradeStatus, getSymbolsWithPrices, SymbolPrices} from '../binance/binance'
 import {buyCoins} from '../buy-coins/buyCoins'
 import {config} from '../config/config'
 import {printReport} from '../dashboard/dashboard'
@@ -43,8 +43,7 @@ jest.mock('../binance/binance', () => {
         }
       ),
       getHistoricPricesForSymbols: jest.fn((
-        symbols: Array<string>,
-        historicData: typeof config.historicData
+        symbols: Array<string>
       ) => {
         return from(readJSON(pricesFileName)).pipe(
           map((it: SymbolPrices[]) => it.reduce((acc, e) => {
@@ -90,14 +89,14 @@ describe.skip('Simulated trading', function () {
   it('shows results', async done => {
     for (; CURRENT_DAY < TOTAL_DAYS; CURRENT_DAY++) {
       console.log(`CURRENT_DAY: ${CURRENT_DAY} - ${BTC_BALANCE}`)
-      await findInvestmentCandidates(getUnsoldCoins()).pipe(
+      await findInvestmentCandidates(getUnsoldCoins(), getPreviousDayTradeStatus()).pipe(
         // tap(it => {console.log(it, 'done - find')}),
         mergeMap(it => buyCoins(it))
       ).toPromise()
 
       await zip(getUnsoldCoins(), getSymbolsWithPrices(), getExchangeInfo()).pipe(
         mergeMap(([unsoldCoins, symbolsWithPrices, exchangeInfo]) => {
-          const coinsToSell = findCoinsToSell(unsoldCoins, symbolsWithPrices)
+          const coinsToSell = findCoinsToSell(unsoldCoins, [], symbolsWithPrices)
           // console.log(coinsToSell, 'cts')
           return sellCoins(coinsToSell, exchangeInfo)
         })

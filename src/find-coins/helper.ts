@@ -1,4 +1,6 @@
 import {orderBy} from 'lodash'
+import {Observable} from 'rxjs'
+import {map} from 'rxjs/operators'
 import {linearRegression} from 'simple-statistics'
 import {SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
@@ -15,22 +17,29 @@ type InvestmentCandidateWithBoughtAmount = InvestmentCandidate & {
 
 export function prioritizeWhatCoinsToBuy(
   investmentCandidates: InvestmentCandidate[],
-  unsoldCoins: Purchase[]
-): InvestmentCandidate[] {
-  const investmentCandidatesWithAmount = investmentCandidates.map(ic => ({
-      ...ic,
-      boughtAmount: unsoldCoins.reduce((a, e) => ic.symbol === e.symbol ? a + e.buyPrice : a, 0)
-    } as InvestmentCandidateWithBoughtAmount)
-  )
+  unsoldCoins: Observable<Purchase[]>
+): Observable<InvestmentCandidate[]> {
+  return unsoldCoins.pipe(
+    map(it => {
+      const investmentCandidatesWithAmount = investmentCandidates.map(ic => ({
+          ...ic,
+          boughtAmount: it.reduce((a, e) => ic.symbol === e.symbol ? a + e.buyPrice : a, 0)
+        } as InvestmentCandidateWithBoughtAmount)
+      )
 
-  return orderBy(investmentCandidatesWithAmount, ['priceSwing', 'boughtAmount'], ['asc', 'desc'])
-    .map(e => {
-      delete e.boughtAmount
-      return e
+      return orderBy(investmentCandidatesWithAmount, ['priceSwing', 'boughtAmount'], ['asc', 'desc'])
+        .map(e => {
+          delete e.boughtAmount
+          return e
+        })
     })
+  )
 }
 
-export function excludeSymbolsWithTooLowPriceSwing(ip: InvestmentCandidate[], priceSwing: number) {
+export function excludeSymbolsWithTooLowPriceSwing(
+  ip: InvestmentCandidate[],
+  priceSwing: number
+): InvestmentCandidate[] {
   return ip.filter(e => e.priceSwing < priceSwing)
 }
 
@@ -50,14 +59,15 @@ export function buildInvestmentCandidates(s: SymbolPrices): InvestmentCandidate 
 }
 
 export function detectDescendingTrend(prices: number[]) {
-  let td1, td2, i = Math.min(prices.length, config.detectDescendingSize)
-  let step = i
-  do {
-    td1 = computeAverage(prices.slice(-i, -i * 2))
-    td2 = computeAverage(prices.slice(-i * 2, -i * 3))
+  let td1, td2, step = Math.min(prices.length, config.detectDescendingSize)
+
+  for (let i = prices.length - 1; i > 0; i -= step * 2) {
+    td1 = computeAverage(prices.slice(i - step, i))
+    td2 = computeAverage(prices.slice(i - (step * 3), i - (step * 2)))
     i = Math.min(prices.length, i + step)
-  } while (td2 - td1 > 0)
-  return prices.slice(-i)
+    if(td2 - td1 < 0) return prices.slice(i - (step * 2), prices.length)
+  }
+  return prices
 }
 
 function calculateTrendDirection(prices: number[]) {

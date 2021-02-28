@@ -1,7 +1,7 @@
 import {of, throwError} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
 import {SymbolPrices} from '../binance/binance'
-import {mockHistoricPrices, mockSymbols} from '../binance/binance.mock'
+import {mockHistoricPrices, mockSymbols, stubPreviousDayResult} from '../binance/binance.mock'
 import {excludeSymbolsWithLowPrices, findInvestmentCandidates, InvestmentCandidate} from './findInvestmentCandidates'
 
 jest.mock('../binance/binance', () => ({
@@ -15,8 +15,9 @@ jest.mock('../binance/binance', () => ({
 describe(findInvestmentCandidates, function () {
   it('returns coins to buy', marbles(m => {
     const mockInvestmentCandidate: InvestmentCandidate = {
-      symbol: 'ETHBTC',
-      prices: [
+      'symbol': 'ETHBTC',
+      'prices': [
+        0.033662, 0.03383,
         0.034282, 0.034767,
         0.036626, 0.037235,
         0.039875, 0.0386,
@@ -25,22 +26,17 @@ describe(findInvestmentCandidates, function () {
         0.034086, 0.033312,
         0.034332, 0.021
       ],
-      maxPrice: 0.039875,
-      minPrice: 0.021,
-      slope: -0.0006029802197802229,
-      priceSwing: -47.33542319749216,
-      trendDirection: 1.6529659863945578
+      'maxPrice': 0.039875,
+      'minPrice': 0.021,
+      'slope': -0.0003634294117647067,
+      'priceSwing': -47.33542319749216,
+      'trendDirection': 1.6472142857142857
     }
-    m.expect(findInvestmentCandidates(of([]))).toBeObservable('(a|)', {
+    const previousDayTrades = of([
+      stubPreviousDayResult({symbol: 'ETHBTC', priceChangePercent: '0'})
+    ])
+    m.expect(findInvestmentCandidates(of([]), previousDayTrades)).toBeObservable('(a|)', {
       a: [mockInvestmentCandidate]
-    })
-  }))
-
-  it('returns empty array on error', marbles(m => {
-    // @ts-ignore hide the error message
-    global.console = {error: jest.fn()}
-    m.expect(findInvestmentCandidates(of([]))).toBeObservable('(a|)', {
-      a: []
     })
   }))
 })
@@ -48,9 +44,9 @@ describe(findInvestmentCandidates, function () {
 describe(excludeSymbolsWithLowPrices, function () {
   it('excludes symbols if the price is too low', function () {
     const symbolPrices: SymbolPrices[] = [
-      {symbol: 'SKYETH2', prices: [0.00000014]},
-      {symbol: 'SKYETH', prices: [0.00000013]},
-      {symbol: 'WTCBTC', prices: [0.00000012]}
+      {symbol: 'SKYET2', prices: [0.0000010]},
+      {symbol: 'SKYETH', prices: [0.0000009]},
+      {symbol: 'WTCBTC', prices: [0.0000008]}
     ]
     expect(excludeSymbolsWithLowPrices(symbolPrices)).toEqual([symbolPrices[0]])
   })

@@ -1,5 +1,6 @@
 import {CoinOrder, SymbolInfo} from 'node-binance-api'
 import {of} from 'rxjs'
+import {PreviousDayResult} from 'node-binance-api'
 import {dbClear} from '../db/dbClear'
 import {dbSave} from '../db/dbSave'
 import {mockPurchase} from '../db/entity/Purchase.mock'
@@ -22,6 +23,11 @@ const purchase2 = mockPurchase({
 const coinPrices = {
   'ETHBTC': 0.3
 }
+
+const previousDayTradeStatus = {
+  priceChangePercent: '10',
+  symbol: 'ETHBTC',
+} as PreviousDayResult
 
 jest.mock('../binance/binance', () => ({
     sellAtMarketPrice: jest.fn()
@@ -48,8 +54,11 @@ jest.mock('../binance/binance', () => ({
 
 describe(findCoinsToSell, function () {
   it('returns coins where current-price is higher than sell-price', () => {
-    expect(findCoinsToSell([purchase], coinPrices))
-      .toEqual([purchase])
+    expect(findCoinsToSell(
+      [purchase],
+      [previousDayTradeStatus],
+      coinPrices)
+    ).toEqual([purchase])
   })
 })
 

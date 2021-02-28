@@ -1,4 +1,4 @@
-import Binance, {CoinOrder, CoinPrices, SymbolInfo, Tick} from 'node-binance-api'
+import Binance, {AccountBalance, CoinOrder, CoinPrices, PreviousDayResult, SymbolInfo, Tick} from 'node-binance-api'
 import {from, Observable, of} from 'rxjs'
 import {catchError, first, map} from 'rxjs/operators'
 import {config} from '../config/config'
@@ -52,7 +52,13 @@ export function getTicksPrices(ticks: Tick[]): number[] {
 export function getBalanceForCoin(symbol: string): Observable<number> {
   return from(binance.balance()).pipe(
     first(),
-    map(it => Number(it[config.baseCurrency].available))
+    map(it => Number(it[symbol].available))
+  )
+}
+
+export function getAccountBalance(): Observable<AccountBalance> {
+  return from(binance.balance()).pipe(
+    first()
   )
 }
 
@@ -72,4 +78,9 @@ export function sellAtMarketPrice(symbol: string, quantity: number): Observable<
 
 export function getSymbolsWithPrices(): Observable<CoinPrices> {
   return from(binance.prices()).pipe(first())
+}
+
+export function getPreviousDayTradeStatus(): Observable<PreviousDayResult[]> {
+  // @ts-ignore
+  return from(binance.prevDay()).pipe(first())
 }

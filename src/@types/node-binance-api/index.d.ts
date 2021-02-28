@@ -4,7 +4,7 @@ declare module 'node-binance-api' {
 
     candlesticks(symbol: string, interval: string, callback: any, options: Options): Promise<Tick[]>
 
-    balance(): Promise<CoinBalances>
+    balance(): Promise<AccountBalance>
     exchangeInfo(): Promise<ExchangeInfo>
 
     prices(): Promise<CoinPrices>
@@ -55,7 +55,7 @@ declare module 'node-binance-api' {
     onOrder: string
   }
 
-  export type CoinBalances = {[k: string] : Balance}
+  export type AccountBalance = {[k: string] : Balance}
 
   export type Tick = [
     number, // Open time
@@ -71,4 +71,18 @@ declare module 'node-binance-api' {
     string, // Taker buy quote asset volume
     string, // Ignore.
   ]
+
+  export type PreviousDayResult = {
+    'symbol': string // "BNBBTC",
+    'priceChange': string // "-94.99999800",
+    'priceChangePercent': string // "-95.960",
+    'weightedAvgPrice': string // "0.29628482",
+    'prevClosePrice': string // "0.10002000",
+    'lastPrice': string // "4.00000200",
+    'openPrice': string // "99.00000000",
+    'highPrice': string // "100.00000000",
+    'lowPrice': string // "0.10000000",
+    'askPrice': string // "4.00000200",
+    'bidPrice': string // "4.00000000",
+  }
 }
