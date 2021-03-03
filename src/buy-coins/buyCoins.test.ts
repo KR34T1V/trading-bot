@@ -1,6 +1,5 @@
 import {of} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
-import {config} from '../config/config'
 import {calculateHowManyOfEachCoinsToBuy, getFundsToInvest} from './buyCoins'
 
 describe(calculateHowManyOfEachCoinsToBuy, function () {
@@ -8,19 +7,19 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     const symbolsToBuy = ['a', 'b', 'c']
     const coinPrices = {
       'a': 1,
-      'b': 3,
+      'b': 5,
       'c': 1,
       'd': 1
     }
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 25,
-      minOrderPrice: 12,
+      fundsToInvest: 7,
+      minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
     }))
       .toEqual({
-        a: 12,
-        c: 12
+        a: 3,
+        c: 3
       })
   })
   it('does not overbuy', function () {
@@ -33,13 +32,14 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     }
 
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 12 + 24 + 4,
-      minOrderPrice: 12,
+      fundsToInvest: 13,
+      minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
       coinPrices
     })).toEqual({
-      a: 12,
-      d: 12
+      a: 3,
+      b: 2,
+      c: 2
     })
   })
   it('returns empty object if not enough funds', function () {
@@ -97,7 +97,7 @@ jest.mock('../binance/binance', () => ({
 
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {
-    m.expect(getFundsToInvest(config.percentToInvest)).toBeObservable('(a|)', {
+    m.expect(getFundsToInvest(0.06)).toBeObservable('(a|)', {
       a: 0.03
     })
   }))

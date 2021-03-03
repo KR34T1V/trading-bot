@@ -28,7 +28,7 @@ jest.mock('../binance/binance', () => {
           const symbolPrice = (readJSONSync(pricesFileName) as SymbolPrices[])
             .find(e => e.symbol === symbol)
             ?.prices[CURRENT_DAY + config.historicData.limit]
-        console.log('sellAtMarketPrice', symbol, Number(symbolPrice), quantity * Number(symbolPrice))
+          console.log('sellAtMarketPrice', symbol, Number(symbolPrice), quantity * Number(symbolPrice))
           BTC_BALANCE += quantity * Number(symbolPrice)
           return of({
             fills: [{
@@ -89,7 +89,12 @@ describe.skip('Simulated trading', function () {
   it('shows results', async done => {
     for (; CURRENT_DAY < TOTAL_DAYS; CURRENT_DAY++) {
       console.log(`CURRENT_DAY: ${CURRENT_DAY} - ${BTC_BALANCE}`)
-      await findInvestmentCandidates(getUnsoldCoins(), getPreviousDayTradeStatus(), getSymbolsWithPrices()).pipe(
+      await findInvestmentCandidates(
+        getUnsoldCoins(),
+        getPreviousDayTradeStatus(),
+        getSymbolsWithPrices(),
+        getExchangeInfo()
+      ).pipe(
         // tap(it => {console.log(it, 'done - find')}),
         mergeMap(it => buyCoins(it))
       ).toPromise()

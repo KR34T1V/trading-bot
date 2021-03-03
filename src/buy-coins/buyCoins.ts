@@ -48,11 +48,6 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
       }
 
       if (quantity * args.coinPrices[symbol] >= args.minOrderPrice) {
-        // ignore expensive coins
-        if (quantity < 12) {
-          fundsLeft += args.coinPrices[symbol] * quantity
-          break
-        }
         coinsToBuy[symbol] = quantity
         // avoid checking other coins if not enough funds
         if (fundsLeft < args.minOrderPrice) return coinsToBuy

@@ -34,8 +34,8 @@ export function findCoinsToSell(
     if (!prevDayStatus) throw Error('Could not find symbol with prices')
 
     return Number(prevDayStatus.priceChangePercent) > 25
-      ? priceGrowth > config.sellPercent
-      : false
+      ? priceGrowth > 0.30
+      : priceGrowth > config.sellPercent
   })
 }
 

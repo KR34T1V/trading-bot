@@ -1,8 +1,14 @@
+import {SymbolInfo} from 'node-binance-api'
 import {of, throwError} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
 import {SymbolPrices} from '../binance/binance'
 import {mockHistoricPrices, mockSymbols, stubPreviousDayResult} from '../binance/binance.mock'
-import {excludeSymbolsWithLowPrices, findInvestmentCandidates, InvestmentCandidate} from './findInvestmentCandidates'
+import {
+  excludeIndivisibleCoins,
+  excludeSymbolsWithLowPrices,
+  findInvestmentCandidates,
+  InvestmentCandidate
+} from './findInvestmentCandidates'
 
 jest.mock('../binance/binance', () => ({
     getAllSymbols: jest.fn()
@@ -13,7 +19,7 @@ jest.mock('../binance/binance', () => ({
 )
 
 describe(findInvestmentCandidates, function () {
-  it('returns coins to buy', marbles(m => {
+  it.only('returns coins to buy', marbles(m => {
     const coinPrices = {
       'ETHBTC': 0.039875
     }
@@ -38,7 +44,12 @@ describe(findInvestmentCandidates, function () {
     const previousDayTrades = of([
       stubPreviousDayResult({symbol: 'ETHBTC', priceChangePercent: '0'})
     ])
-    m.expect(findInvestmentCandidates(of([]), previousDayTrades, of(coinPrices))).toBeObservable('(a|)', {
+    m.expect(findInvestmentCandidates(
+      of([]),
+      previousDayTrades,
+      of(coinPrices),
+      of()
+    )).toBeObservable('(a|)', {
       a: [mockInvestmentCandidate]
     })
   }))
@@ -53,4 +64,43 @@ describe(excludeSymbolsWithLowPrices, function () {
     ]
     expect(excludeSymbolsWithLowPrices(symbolPrices)).toEqual([symbolPrices[0]])
   })
+})
+
+describe(excludeIndivisibleCoins, function () {
+  it('excludes expensive indivisible coins', marbles(m => {
+    const symbolPrices: SymbolPrices[] = [
+      {symbol: 'SKYET2', prices: [0.0000010]},
+      {symbol: 'SKYETH', prices: [0.0000009]},
+      {symbol: 'WTCBTC', prices: [0.0000008]}
+    ]
+    const exchangeInfo: SymbolInfo[] = [
+      // @ts-ignore
+      {
+        symbol: 'SKYETH',
+        filters: [
+          {
+            filterType: 'LOT_SIZE',
+            stepSize: '0.01',
+            maxQty: '1',
+            minQty: '1'
+          }
+        ]
+      },
+      // @ts-ignore
+      {
+        symbol: 'SKYET2',
+        filters: [
+          {
+            filterType: 'LOT_SIZE',
+            stepSize: '1.000',
+            maxQty: '1',
+            minQty: '1'
+          }
+        ]
+      }
+    ]
+    m.expect(excludeIndivisibleCoins(symbolPrices, of(exchangeInfo))).toBeObservable('(a|)', {
+      a: [symbolPrices[1]]
+    })
+  }))
 })

@@ -1,7 +1,7 @@
 import * as asciichart from 'asciichart'
 import {mergeMap, tap} from 'rxjs/operators'
 import yargs from 'yargs'
-import {getPreviousDayTradeStatus, getSymbolsWithPrices} from './src/binance/binance'
+import {getExchangeInfo, getPreviousDayTradeStatus, getSymbolsWithPrices} from './src/binance/binance'
 import {buyCoins} from './src/buy-coins/buyCoins'
 import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
@@ -20,7 +20,12 @@ const args = yargs
   .argv
 
 dbConnect().then(_ => {
-  findInvestmentCandidates(getUnsoldCoins(), getPreviousDayTradeStatus(), getSymbolsWithPrices()).pipe(
+  findInvestmentCandidates(
+    getUnsoldCoins(),
+    getPreviousDayTradeStatus(),
+    getSymbolsWithPrices(),
+    getExchangeInfo()
+  ).pipe(
     tap(it => {
       args.dryRun && it.forEach(({symbol, prices, priceSwing}) => {
         console.log(`${symbol}: ${priceSwing}: ${prices.length}`)

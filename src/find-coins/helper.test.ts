@@ -1,4 +1,5 @@
 import {of} from 'rxjs'
+import {marbles} from 'rxjs-marbles'
 import {config} from '../config/config'
 import {mockPurchase} from '../db/entity/Purchase.mock'
 import {InvestmentCandidate} from './findInvestmentCandidates'
@@ -12,7 +13,7 @@ import {
   prioritizeWhatCoinsToBuy
 } from './helper'
 
-describe(excludeNonBTCSymbols.name, function () {
+describe(excludeNonBTCSymbols, function () {
   it('removes non-BTC symbols', function () {
     const symbols = ['SKYETH', 'WTCBTC']
     expect(excludeNonBTCSymbols(symbols)).toEqual(['WTCBTC'])
@@ -68,10 +69,10 @@ describe(detectDescendingTrend, function () {
       0.00000567, 0.00000688, 0.00000574,
       0.00000559, 0.00000479, 0.00000457
     ]
-    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-(config.detectDescendingSize * 2)))
+    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-(config.detectDescendingSize * 3)))
   })
 
-  it.only('AGIBTC - 21.02.21', function () {
+  it('AGIBTC - 21.02.21', function () {
     const prices = [
       0.00000215, 0.00000216, 0.00000215, 0.00000232, 0.00000231,
       0.0000024, 0.00000258, 0.00000242, 0.00000232, 0.00000232,
@@ -143,26 +144,28 @@ describe('computeAverage', function () {
 })
 
 describe(prioritizeWhatCoinsToBuy, function () {
-  it('prioritizes coins unbought and with biggest price swing', () => {
+  it('prioritizes coins unbought and with biggest price swing', marbles(m => {
     const ic = [
-      mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
-      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1}),
-      mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10}),
-      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5})
+      mockInvestmentCandidate({symbol: 'BTCETH1', priceSwing: -2}),
+      mockInvestmentCandidate({symbol: 'BTCETH2', priceSwing: -1}),
+      mockInvestmentCandidate({symbol: 'BTCETH3', priceSwing: -10}),
+      mockInvestmentCandidate({symbol: 'BTCETH4', priceSwing: -5})
     ]
     const unsoldCoins = [
       mockPurchase({symbol: 'BTCETH3', buyPrice: 1})
     ]
-    expect(prioritizeWhatCoinsToBuy(ic, of(unsoldCoins))).toEqual([
-      mockInvestementCandidate({symbol: 'BTCETH3', priceSwing: -10}),
-      mockInvestementCandidate({symbol: 'BTCETH4', priceSwing: -5}),
-      mockInvestementCandidate({symbol: 'BTCETH1', priceSwing: -2}),
-      mockInvestementCandidate({symbol: 'BTCETH2', priceSwing: -1})
-    ])
-  })
+    m.expect(prioritizeWhatCoinsToBuy(ic, of(unsoldCoins))).toBeObservable('(a|)', {
+      a: [
+        mockInvestmentCandidate({symbol: 'BTCETH3', priceSwing: -10}),
+        mockInvestmentCandidate({symbol: 'BTCETH4', priceSwing: -5}),
+        mockInvestmentCandidate({symbol: 'BTCETH1', priceSwing: -2}),
+        mockInvestmentCandidate({symbol: 'BTCETH2', priceSwing: -1})
+      ]
+    })
+  }))
 })
 
-function mockInvestementCandidate(init: Partial<InvestmentCandidate>): InvestmentCandidate {
+function mockInvestmentCandidate(init: Partial<InvestmentCandidate>): InvestmentCandidate {
   return Object.assign({
     symbol: 'BTCETH',
     prices: [],
