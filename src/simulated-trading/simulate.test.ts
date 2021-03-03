@@ -89,7 +89,7 @@ describe.skip('Simulated trading', function () {
   it('shows results', async done => {
     for (; CURRENT_DAY < TOTAL_DAYS; CURRENT_DAY++) {
       console.log(`CURRENT_DAY: ${CURRENT_DAY} - ${BTC_BALANCE}`)
-      await findInvestmentCandidates(getUnsoldCoins(), getPreviousDayTradeStatus()).pipe(
+      await findInvestmentCandidates(getUnsoldCoins(), getPreviousDayTradeStatus(), getSymbolsWithPrices()).pipe(
         // tap(it => {console.log(it, 'done - find')}),
         mergeMap(it => buyCoins(it))
       ).toPromise()

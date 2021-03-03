@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import {PreviousDayResult} from 'node-binance-api'
-import {Observable} from 'rxjs'
+import {CoinPrices, PreviousDayResult} from 'node-binance-api'
+import {Observable, zip} from 'rxjs'
 import {map, mergeMap} from 'rxjs/operators'
 import {getAllSymbols, getHistoricPricesForSymbols, SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
@@ -24,14 +24,15 @@ export type InvestmentCandidate = {
 
 export function findInvestmentCandidates(
   unsoldCoins: Observable<Purchase[]>,
-  previousDayTrades: Observable<PreviousDayResult[]>
+  previousDayTrades: Observable<PreviousDayResult[]>,
+  coinPrices: Observable<CoinPrices>
 ): Observable<InvestmentCandidate[]> {
   return getAllSymbols().pipe(
     map(excludeNonBTCSymbols),
     mergeMap(it => getHistoricPricesForSymbols(it, config.historicData)),
     map(excludeSymbolsWithLowPrices),
     map(excludeNewlyAddedCoins),
-    mergeMap(it => excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(it, unsoldCoins)),
+    mergeMap(it => excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(it, unsoldCoins, coinPrices)),
     mergeMap(it => excludeSymbolsIfPriceStillDropping(it, previousDayTrades)),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
@@ -49,18 +50,21 @@ export function excludeSymbolsWithLowPrices(sp: SymbolPrices[]): SymbolPrices[] 
 
 export function excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(
   historicPrices: SymbolPrices[],
-  unsoldCoins: Observable<Purchase[]>
+  unsoldCoins: Observable<Purchase[]>,
+  coinPrices: Observable<CoinPrices>
 ): Observable<SymbolPrices[]> {
-  return unsoldCoins.pipe(
-    map(it => {
+  return zip(unsoldCoins, coinPrices).pipe(
+    map(([unsold, latestPrices]) => {
       return historicPrices.filter(e => {
-        const latestPrice = e.prices[e.prices.length - 1]
-        const latestUnsold = it.reverse().find(c => c.symbol === e.symbol)
+        const latestPrice = latestPrices[e.symbol]
+        const latestUnsold = unsold
+          .sort((a,b) => a.id > b.id ? -1 : 1)
+          .find(c => c.symbol === e.symbol)
         const previousBuyPrice = latestUnsold
           ? latestUnsold.buyPrice / latestUnsold.quantity
           : 999999
 
-        return latestPrice < previousBuyPrice * 0.85
+        return latestPrice < previousBuyPrice * 0.9
       })
     })
   )

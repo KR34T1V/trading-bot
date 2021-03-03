@@ -14,6 +14,9 @@ jest.mock('../binance/binance', () => ({
 
 describe(findInvestmentCandidates, function () {
   it('returns coins to buy', marbles(m => {
+    const coinPrices = {
+      'ETHBTC': 0.039875
+    }
     const mockInvestmentCandidate: InvestmentCandidate = {
       'symbol': 'ETHBTC',
       'prices': [
@@ -35,7 +38,7 @@ describe(findInvestmentCandidates, function () {
     const previousDayTrades = of([
       stubPreviousDayResult({symbol: 'ETHBTC', priceChangePercent: '0'})
     ])
-    m.expect(findInvestmentCandidates(of([]), previousDayTrades)).toBeObservable('(a|)', {
+    m.expect(findInvestmentCandidates(of([]), previousDayTrades, of(coinPrices))).toBeObservable('(a|)', {
       a: [mockInvestmentCandidate]
     })
   }))
