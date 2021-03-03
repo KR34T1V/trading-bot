@@ -72,8 +72,14 @@ export function buyAtMarketPrice(symbol: string, quantity: number): Observable<C
   )
 }
 
-export function sellAtMarketPrice(symbol: string, quantity: number): Observable<CoinOrder> {
-  return from(binance.marketSell(symbol, quantity)).pipe(first())
+export function sellAtMarketPrice(symbol: string, quantity: number): Observable<CoinOrder | undefined> {
+  return from(binance.marketSell(symbol, quantity)).pipe(
+    first(),
+    catchError(err => {
+      console.error(`Could not sell coin: ${symbol} - ${quantity}`, err)
+      return of(undefined)
+    })
+  )
 }
 
 export function getSymbolsWithPrices(): Observable<CoinPrices> {

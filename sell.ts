@@ -1,5 +1,5 @@
 import {zip} from 'rxjs'
-import {map, mergeMap, tap} from 'rxjs/operators'
+import {mergeMap, tap} from 'rxjs/operators'
 import yargs from 'yargs'
 import {getExchangeInfo, getPreviousDayTradeStatus, getSymbolsWithPrices} from './src/binance/binance'
 import {dbConnect} from './src/db/dbConnect'
@@ -21,18 +21,7 @@ const args = yargs
 dbConnect().then(_ => {
 
   zip(
-    zip(
-      getUnsoldCoins(),
-      getSymbolsWithPrices()
-    ).pipe(
-      map(([unsoldCoins, symbolPrices]) => {
-        return unsoldCoins
-          .filter(e => {
-            const latestPrice = symbolPrices[e.symbol]
-            return e.quantity * latestPrice > 0.0001
-          })
-      })
-    ),
+    getUnsoldCoins(),
     getPreviousDayTradeStatus(),
     getExchangeInfo(),
     getSymbolsWithPrices()

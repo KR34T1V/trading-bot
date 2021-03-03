@@ -1,6 +1,5 @@
-import {CoinOrder, SymbolInfo} from 'node-binance-api'
+import {CoinOrder, PreviousDayResult, SymbolInfo} from 'node-binance-api'
 import {of} from 'rxjs'
-import {PreviousDayResult} from 'node-binance-api'
 import {dbClear} from '../db/dbClear'
 import {dbSave} from '../db/dbSave'
 import {mockPurchase} from '../db/entity/Purchase.mock'
@@ -10,14 +9,14 @@ const purchase = mockPurchase({
   buyTime: new Date,
   buyPrice: 0.1,
   quantity: 1,
-  symbol: 'ETHBTC',
+  symbol: 'ETHBTC'
 })
 
 const purchase2 = mockPurchase({
   buyTime: new Date,
   buyPrice: 0.12,
   quantity: 1,
-  symbol: 'ETHBTC',
+  symbol: 'ETHBTC'
 })
 
 const coinPrices = {
@@ -25,8 +24,8 @@ const coinPrices = {
 }
 
 const previousDayTradeStatus = {
-  priceChangePercent: '10',
-  symbol: 'ETHBTC',
+  priceChangePercent: '26',
+  symbol: 'ETHBTC'
 } as PreviousDayResult
 
 jest.mock('../binance/binance', () => ({
@@ -38,13 +37,7 @@ jest.mock('../binance/binance', () => ({
         fills: [{price: '0.3', qty: '1', commission: '0.1'}],
         executedQty: '1'
       } as CoinOrder))
-      .mockImplementationOnce(() => of({
-        symbol: purchase.symbol,
-        price: 0.2,
-        cummulativeQuoteQty: '1',
-        fills: [{price: '0.2', qty: '1', commission: '0.1'}],
-        executedQty: '1'
-      } as CoinOrder)),
+      .mockImplementationOnce(() => of(undefined)),
     getSymbolsWithPrices: jest.fn(
       () => of(coinPrices)
     ),
@@ -53,11 +46,12 @@ jest.mock('../binance/binance', () => ({
 )
 
 describe(findCoinsToSell, function () {
-  it('returns coins where current-price is higher than sell-price', () => {
+  it('returns coins where current-price is higher than buy-price', () => {
     expect(findCoinsToSell(
       [purchase],
       [previousDayTradeStatus],
-      coinPrices)
+      coinPrices
+      )
     ).toEqual([purchase])
   })
 })
@@ -84,8 +78,8 @@ describe(sellCoins, function () {
     sellCoins([unsoldPurchase1, unsoldPurchase2], [exchangeInfo]).subscribe(
       {
         next: (it) => {
-          expect(it[0].sell.sellPrice).toBe(0.3)
-          expect(it[1].sell.sellPrice).toBe(0.2)
+          expect(it[0]?.sell.sellPrice).toBe(0.3)
+          expect(it[1]).toBe(undefined)
         },
         complete: () => done()
       }
