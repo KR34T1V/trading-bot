@@ -35,7 +35,7 @@ export function findInvestmentCandidates(
     // map(excludeNewlyAddedCoins), // one of those things
     mergeMap(it => excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(it, unsoldCoins, coinPrices)),
     mergeMap(it => excludeSymbolsIfPriceStillDropping(it, previousDayTrades)),
-    mergeMap(it => excludeIndivisibleCoins(it, exchangeInfo)),
+    mergeMap(it => excludeExpensiveIndivisibleCoins(it, exchangeInfo, coinPrices)),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
     mergeMap(it => prioritizeWhatCoinsToBuy(it, unsoldCoins))
@@ -84,24 +84,28 @@ export function excludeSymbolsIfPriceStillDropping(
         if (!prevDayStatus) return false
 
         const priceChange = Number(prevDayStatus.priceChangePercent)
-        return priceChange > -4
-          && priceChange < 3
+        return priceChange > -5
+          && priceChange < 5
       })
     })
   )
 }
 
 // Indivisible - meaning you can not sell half a coin
-export function excludeIndivisibleCoins(
+export function excludeExpensiveIndivisibleCoins(
   historicPrices: SymbolPrices[],
-  exchangeInfo: Observable<SymbolInfo[]>
+  exchangeInfo: Observable<SymbolInfo[]>,
+  coinPrices: Observable<CoinPrices>,
 ): Observable<SymbolPrices[]> {
-  return exchangeInfo.pipe(
-    map(it => historicPrices.filter(e => {
-      const symbolExchangeInfo = it.find(a => a.symbol === e.symbol)
+  return zip(exchangeInfo, coinPrices).pipe(
+    map(([ei, latestPrices]) => historicPrices.filter(e => {
+      const symbolExchangeInfo = ei.find(a => a.symbol === e.symbol)
+      const coinPrice = latestPrices[e.symbol]
       if (!symbolExchangeInfo) return false
       const lotSize = symbolExchangeInfo.filters.find(a => a.filterType === 'LOT_SIZE')?.stepSize ?? '1'
+
       return Number(lotSize) < 1
+        || (Number(lotSize) === 1 && coinPrice < 0.00002)
     }))
   )
 }

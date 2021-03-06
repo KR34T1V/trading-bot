@@ -33,7 +33,7 @@ export function findCoinsToSell(
     const prevDayStatus = previousDayTradeStatus.find(a => a.symbol === e.symbol)
     if (!prevDayStatus) throw Error('Could not find symbol with prices')
 
-    return Number(prevDayStatus.priceChangePercent) > 25
+    return Number(prevDayStatus.priceChangePercent) > 9
       ? priceGrowth > 0.30
       : priceGrowth > config.sellPercent
   })

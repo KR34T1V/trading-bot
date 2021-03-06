@@ -9,9 +9,9 @@ export const config = {
     interval: '8h',
     limit: 90
   },
-  sellPercent: 0.09,
+  sellPercent: 0.10,
   fee: 0.999,
-  minOrderAmount: 0.0002,
+  minOrderAmount: 0.0003,
   priceSwing: -15, // only buy if the price dropped low enough (in percent)
   percentToInvest: 0.05, // how many percent to invest each run
   detectDescendingSize: 8 // based on how many ticks to detect the descending trend
