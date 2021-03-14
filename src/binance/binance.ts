@@ -26,6 +26,15 @@ export function getAllSymbols(): Observable<Array<string>> {
   )
 }
 
+export function getAllBTCSymbols(): Observable<Array<string>> {
+  return from(binance.exchangeInfo()).pipe(
+    first(),
+    map(it => it.symbols.filter(e => e.isSpotTradingAllowed && e.status === 'TRADING')),
+    map(it => it.map(e => e.symbol)),
+    map(it => it.filter(e => e.endsWith(config.baseCurrency)))
+  )
+}
+
 export type SymbolPrices = {symbol: string, prices: Array<number>}
 
 export function getHistoricPricesForSymbols(
@@ -38,14 +47,14 @@ export function getHistoricPricesForSymbols(
         return binance.candlesticks(s, historicData.interval, false, {limit: historicData.limit})
           .then((t: Tick[]) => ({
             symbol: s,
-            prices: getTicksPrices(t)
+            prices: getClosePrices(t)
           }))
       })
     )
   ).pipe(first())
 }
 
-export function getTicksPrices(ticks: Tick[]): number[] {
+export function getClosePrices(ticks: Tick[]): number[] {
   return ticks.map((e) => Number(e[4]))
 }
 

@@ -1,7 +1,7 @@
-import {CoinOrder, CoinPrices, PreviousDayResult, SymbolInfo} from 'node-binance-api'
+import {CoinOrder, SymbolInfo} from 'node-binance-api'
 import {forkJoin, Observable, of} from 'rxjs'
 import {mergeMap} from 'rxjs/operators'
-import {roundStep, sellAtMarketPrice} from '../binance/binance'
+import {roundStep, sellAtMarketPrice, SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
@@ -23,19 +23,20 @@ export function sellCoins(coinsToSell: Purchase[], exchangeInfo: SymbolInfo[]) {
 
 export function findCoinsToSell(
   boughtCoins: Purchase[],
-  previousDayTradeStatus: PreviousDayResult[],
-  latestCoinPrices: CoinPrices
+  historicPrices: SymbolPrices[]
 ) {
   return boughtCoins.filter(e => {
-    const latestPrice = latestCoinPrices[e.symbol]
+    const historicSymbolPrices = historicPrices.find(a => a.symbol === e.symbol)?.prices
+    if (!historicSymbolPrices) return false
+
+    const latestPrice = historicSymbolPrices[historicSymbolPrices.length - 1]
+    const previousPrice = historicSymbolPrices[historicSymbolPrices.length - 2]
     const buyPrice = e.buyPrice / e.quantity
     const priceGrowth = (latestPrice - buyPrice) / buyPrice
-    const prevDayStatus = previousDayTradeStatus.find(a => a.symbol === e.symbol)
-    if (!prevDayStatus) throw Error('Could not find symbol with prices')
+    const priceChange = (latestPrice - previousPrice) / previousPrice
 
-    return Number(prevDayStatus.priceChangePercent) > 9
-      ? priceGrowth > 0.30
-      : priceGrowth > config.sellPercent
+    return priceGrowth > config.sellPercent
+      && priceChange < -0.015
   })
 }
 

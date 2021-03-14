@@ -1,7 +1,8 @@
 import {zip} from 'rxjs'
 import {mergeMap, tap} from 'rxjs/operators'
 import yargs from 'yargs'
-import {getExchangeInfo, getPreviousDayTradeStatus, getSymbolsWithPrices} from './src/binance/binance'
+import {getAllBTCSymbols, getExchangeInfo, getHistoricPricesForSymbols} from './src/binance/binance'
+import {config} from './src/config/config'
 import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
 import {findCoinsToSell, sellCoins} from './src/sell-coins/sellCoins'
@@ -22,12 +23,13 @@ dbConnect().then(_ => {
 
   zip(
     getUnsoldCoins(),
-    getPreviousDayTradeStatus(),
-    getExchangeInfo(),
-    getSymbolsWithPrices()
+    getAllBTCSymbols().pipe(
+      mergeMap(it => getHistoricPricesForSymbols(it, config.historicData))
+    ),
+    getExchangeInfo()
   ).pipe(
-    mergeMap(([unsoldCoins, previousDayTradeStatus, exchangeInfo, latestPrices]) => {
-      const coinsToSell = findCoinsToSell(unsoldCoins, previousDayTradeStatus, latestPrices)
+    mergeMap(([unsoldCoins, historicPrices, exchangeInfo]) => {
+      const coinsToSell = findCoinsToSell(unsoldCoins, historicPrices)
 
       return args.dryRun
         ? coinsToSell

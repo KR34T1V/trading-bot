@@ -19,9 +19,12 @@ const purchase2 = mockPurchase({
   symbol: 'ETHBTC'
 })
 
-const coinPrices = {
-  'ETHBTC': 0.3
-}
+const coinPrices = [
+  {
+    symbol: 'ETHBTC',
+    prices: [0.3, 0.2]
+  }
+]
 
 const previousDayTradeStatus = {
   priceChangePercent: '26',
@@ -49,7 +52,6 @@ describe(findCoinsToSell, function () {
   it('returns coins where current-price is higher than buy-price', () => {
     expect(findCoinsToSell(
       [purchase],
-      [previousDayTradeStatus],
       coinPrices
       )
     ).toEqual([purchase])

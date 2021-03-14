@@ -99,9 +99,13 @@ describe.skip('Simulated trading', function () {
         mergeMap(it => buyCoins(it))
       ).toPromise()
 
-      await zip(getUnsoldCoins(), getSymbolsWithPrices(), getExchangeInfo()).pipe(
-        mergeMap(([unsoldCoins, symbolsWithPrices, exchangeInfo]) => {
-          const coinsToSell = findCoinsToSell(unsoldCoins, [], symbolsWithPrices)
+      await zip(
+        getUnsoldCoins(),
+        of([]),
+        getExchangeInfo()
+      ).pipe(
+        mergeMap(([unsoldCoins, historicPrices, exchangeInfo]) => {
+          const coinsToSell = findCoinsToSell(unsoldCoins, historicPrices)
           // console.log(coinsToSell, 'cts')
           return sellCoins(coinsToSell, exchangeInfo)
         })
