@@ -1,5 +1,5 @@
 import * as asciichart from 'asciichart'
-import {mergeMap, tap} from 'rxjs/operators'
+import {mergeMap, retry, tap} from 'rxjs/operators'
 import yargs from 'yargs'
 import {getExchangeInfo, getPreviousDayTradeStatus, getSymbolsWithPrices} from './src/binance/binance'
 import {buyCoins} from './src/buy-coins/buyCoins'
@@ -22,7 +22,6 @@ const args = yargs
 dbConnect().then(_ => {
   findInvestmentCandidates(
     getUnsoldCoins(),
-    getPreviousDayTradeStatus(),
     getSymbolsWithPrices(),
     getExchangeInfo()
   ).pipe(

@@ -51,8 +51,9 @@ jest.mock('../binance/binance', () => ({
 describe(findCoinsToSell, function () {
   it('returns coins where current-price is higher than buy-price', () => {
     expect(findCoinsToSell(
-      [purchase],
-      coinPrices
+      of([purchase]),
+      of(coinPrices),
+      of(0)
       )
     ).toEqual([purchase])
   })

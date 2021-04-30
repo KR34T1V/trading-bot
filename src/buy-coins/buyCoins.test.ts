@@ -3,11 +3,12 @@ import {marbles} from 'rxjs-marbles'
 import {calculateHowManyOfEachCoinsToBuy, getFundsToInvest} from './buyCoins'
 
 describe(calculateHowManyOfEachCoinsToBuy, function () {
+  const exchangeInfo: Array<any> = []
   it('returns how much to buy', function () {
     const symbolsToBuy = ['a', 'b', 'c']
     const coinPrices = {
       'a': 1,
-      'b': 5,
+      'b': 6,
       'c': 1,
       'd': 1
     }
@@ -15,12 +16,13 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       fundsToInvest: 7,
       minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
+      exchangeInfo,
       coinPrices
     }))
-      .toEqual({
-        a: 3,
-        c: 3
-      })
+      .toEqual([
+        {symbol: 'a', quantity: 3},
+        {symbol: 'b', quantity: 0.5}
+      ])
   })
   it('does not overbuy', function () {
     const symbolsToBuy = ['a', 'b', 'c', 'd']
@@ -32,15 +34,15 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
     }
 
     expect(calculateHowManyOfEachCoinsToBuy({
-      fundsToInvest: 13,
+      fundsToInvest: 6,
       minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
+      exchangeInfo,
       coinPrices
-    })).toEqual({
-      a: 3,
-      b: 2,
-      c: 2
-    })
+    })).toEqual([
+      {symbol: 'a', quantity: 3},
+      {symbol: 'b', quantity: 2}
+    ])
   })
   it('returns empty object if not enough funds', function () {
     const symbolsToBuy = ['a', 'b']
@@ -53,9 +55,10 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       fundsToInvest: 2,
       minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
+      exchangeInfo,
       coinPrices
     }))
-      .toEqual({})
+      .toEqual([])
   })
   it('does not fail with unreal prices', function () {
     const symbolsToBuy: any = []
@@ -67,9 +70,10 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       fundsToInvest: 4,
       minOrderPrice: 3,
       coinsToBuy: symbolsToBuy,
+      exchangeInfo,
       coinPrices
     }))
-      .toEqual({})
+      .toEqual([])
   })
   it('test with real data', function () {
     const symbolsToBuy = ['SCBTC', 'DOGEBTC', 'XVGBTC', 'PHBBTC']
@@ -77,13 +81,17 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       XVGBTC: 3.9e-7,
       PHBBTC: 2.3e-7,
       DOGEBTC: 2.5e-7,
-      SCBTC: 2.5e-7
+      SCBTC: 0.002
     }
-    const expected = {'DOGEBTC': 801, 'SCBTC': 801}
+    const expected = [
+      {symbol: 'SCBTC', quantity: 0.1},
+      {symbol: 'DOGEBTC', quantity: 800}
+    ]
     expect(calculateHowManyOfEachCoinsToBuy({
       fundsToInvest: 0.00057035592,
       minOrderPrice: 0.0002,
       coinsToBuy: symbolsToBuy,
+      exchangeInfo,
       coinPrices
     }))
       .toEqual(expected)
@@ -91,7 +99,8 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
 })
 
 jest.mock('../binance/binance', () => ({
-    getBalanceForCoin: jest.fn(() => of(0.5))
+    getBalanceForCoin: jest.fn(() => of(0.5)),
+    roundStep: jest.fn(() => 1),
   })
 )
 

@@ -24,17 +24,16 @@ export type InvestmentCandidate = {
 
 export function findInvestmentCandidates(
   unsoldCoins: Observable<Purchase[]>,
-  previousDayTrades: Observable<PreviousDayResult[]>,
   coinPrices: Observable<CoinPrices>,
   exchangeInfo: Observable<SymbolInfo[]>
 ): Observable<InvestmentCandidate[]> {
   return getAllSymbols().pipe(
     map(excludeNonBTCSymbols),
     mergeMap(it => getHistoricPricesForSymbols(it, config.historicData)),
-    map(excludeSymbolsWithLowPrices),
+    // map(excludeSymbolsWithLowPrices),
     // map(excludeNewlyAddedCoins), // one of those things
     mergeMap(it => excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(it, unsoldCoins, coinPrices)),
-    mergeMap(it => excludeSymbolsIfPriceStillDropping(it, previousDayTrades)),
+    // mergeMap(it => excludeSymbolsIfPriceStillDropping(it, previousDayTrades)),
     mergeMap(it => excludeExpensiveIndivisibleCoins(it, exchangeInfo, coinPrices)),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
@@ -67,7 +66,7 @@ export function excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(
           ? latestUnsold.buyPrice / latestUnsold.quantity
           : 999999
 
-        return latestPrice < previousBuyPrice * 0.9
+        return latestPrice < previousBuyPrice * 0.83
       })
     })
   )
@@ -105,7 +104,7 @@ export function excludeExpensiveIndivisibleCoins(
       const lotSize = symbolExchangeInfo.filters.find(a => a.filterType === 'LOT_SIZE')?.stepSize ?? '1'
 
       return Number(lotSize) < 1
-        || (Number(lotSize) === 1 && coinPrice < 0.00002)
+        || (Number(lotSize) === 1 && coinPrice < 0.000009)
     }))
   )
 }

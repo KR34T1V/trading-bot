@@ -1,11 +1,12 @@
 import {CoinOrder, SymbolInfo} from 'node-binance-api'
-import {forkJoin, Observable, of} from 'rxjs'
-import {mergeMap} from 'rxjs/operators'
+import {forkJoin, Observable, of, zip} from 'rxjs'
+import {map, mergeMap} from 'rxjs/operators'
 import {roundStep, sellAtMarketPrice, SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
 import {Sell} from '../db/entity/Sell'
+import {computePercentIncrease} from '../plugins/math/computePercentIncrease'
 
 export function sellCoins(coinsToSell: Purchase[], exchangeInfo: SymbolInfo[]) {
   return forkJoin(
@@ -22,29 +23,46 @@ export function sellCoins(coinsToSell: Purchase[], exchangeInfo: SymbolInfo[]) {
 }
 
 export function findCoinsToSell(
-  boughtCoins: Purchase[],
-  historicPrices: SymbolPrices[]
+  boughtCoinsObservable: Observable<Purchase[]>,
+  historicPricesObservable: Observable<SymbolPrices[]>,
+  averageProfitPerTransactionObservable: Observable<number>
 ) {
-  return boughtCoins.filter(e => {
-    const historicSymbolPrices = historicPrices.find(a => a.symbol === e.symbol)?.prices
-    if (!historicSymbolPrices) return false
+  return zip(
+    boughtCoinsObservable,
+    historicPricesObservable,
+    averageProfitPerTransactionObservable,
+  ).pipe(
+    map(([
+      boughtCoins,
+      historicPrices,
+      averageProfitPerTransaction
+    ]) => {
+      return boughtCoins.filter(e => {
+        const historicSymbolPrices = historicPrices.find(a => a.symbol === e.symbol)?.prices
+        if (!historicSymbolPrices ) return false
 
-    const latestPrice = historicSymbolPrices[historicSymbolPrices.length - 1]
-    const previousPrice = historicSymbolPrices[historicSymbolPrices.length - 2]
-    const buyPrice = e.buyPrice / e.quantity
-    const priceGrowth = (latestPrice - buyPrice) / buyPrice
-    const priceChange = (latestPrice - previousPrice) / previousPrice
+        const currentPrice = historicSymbolPrices[historicSymbolPrices.length - 1]
+        const previousPrice = historicSymbolPrices[historicSymbolPrices.length - 2]
+        const buyPrice = e.buyPrice / e.quantity
+        const profit = (currentPrice - buyPrice) / buyPrice
+        const priceChangeSinceLastTick = computePercentIncrease(previousPrice, currentPrice)
 
-    return priceGrowth > config.sellPercent
-      && priceChange < -0.015
-  })
+        // console.log(`${e.symbol} - ${profit} - ${priceChangeSinceLastTick}. prevT: ${previousPrice} lastT: ${latestPrice} change%: ${computePercentIncrease(previousPrice, latestPrice)}`)
+        // console.log(`${e.symbol} - ${previousDayPriceChangeItem.prevDayPriceChange}`)
+
+        return (profit > config.sellPercent && profit > averageProfitPerTransaction + 0.10)
+        || (profit > config.sellPercent && priceChangeSinceLastTick < -0.005)
+
+      })
+    })
+  )
 }
 
 export function markCoinAsSold(boughtCoin: Purchase, soldCoin: CoinOrder): Observable<Purchase> {
   const sell = new Sell()
-  sell.sellPrice = soldCoin.fills.reduce((acc, v) =>
-      acc += Number(v.price) * Number(v.qty)
-    , 0)
+  sell.sellPrice = soldCoin.fills.reduce(
+    (acc, v) => acc + Number(v.price) * Number(v.qty), 0
+  )
   sell.sellTime = new Date
   boughtCoin.sell = sell
 

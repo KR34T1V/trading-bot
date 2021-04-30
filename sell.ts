@@ -1,8 +1,10 @@
+import {exec} from 'child_process'
 import {zip} from 'rxjs'
-import {mergeMap, tap} from 'rxjs/operators'
+import {mergeMap, retry, tap} from 'rxjs/operators'
 import yargs from 'yargs'
 import {getAllBTCSymbols, getExchangeInfo, getHistoricPricesForSymbols} from './src/binance/binance'
 import {config} from './src/config/config'
+import {getAverageProfitPerTransaction} from './src/dashboard/getAverageProfitPerTransaction'
 import {dbConnect} from './src/db/dbConnect'
 import {getUnsoldCoins} from './src/db/fetcher/getUnsoldCoins'
 import {findCoinsToSell, sellCoins} from './src/sell-coins/sellCoins'
@@ -20,17 +22,17 @@ const args = yargs
   .argv
 
 dbConnect().then(_ => {
-
   zip(
-    getUnsoldCoins(),
-    getAllBTCSymbols().pipe(
-      mergeMap(it => getHistoricPricesForSymbols(it, config.historicData))
+    findCoinsToSell(
+      getUnsoldCoins(),
+      getAllBTCSymbols().pipe(
+        mergeMap(it => getHistoricPricesForSymbols(it, config.historicData))
+      ),
+      getAverageProfitPerTransaction()
     ),
     getExchangeInfo()
   ).pipe(
-    mergeMap(([unsoldCoins, historicPrices, exchangeInfo]) => {
-      const coinsToSell = findCoinsToSell(unsoldCoins, historicPrices)
-
+    mergeMap(([coinsToSell, exchangeInfo]) => {
       return args.dryRun
         ? coinsToSell
         : sellCoins(coinsToSell, exchangeInfo)

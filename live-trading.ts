@@ -3,11 +3,15 @@ import schedule from 'node-schedule'
 
 // https://crontab.guru
 
-schedule.scheduleJob('*/30 * * * *', function () {
+// schedule.scheduleJob('*/19 * * * *', function () {
+//   execWithStdout('yarn dashboard')
+// })
+
+schedule.scheduleJob('*/29 * * * *', function () {
   execWithStdout('yarn sell')
 })
 
-schedule.scheduleJob('1 */4 * * *', function () {
+schedule.scheduleJob('1 */1 * * *', function () {
   execWithStdout('yarn buy')
 })
 

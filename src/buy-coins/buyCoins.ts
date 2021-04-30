@@ -1,34 +1,58 @@
-import {CoinOrder, CoinPrices} from 'node-binance-api'
+import {CoinOrder, CoinPrices, SymbolInfo} from 'node-binance-api'
 import {Observable, zip} from 'rxjs'
 import {map, mergeMap, tap} from 'rxjs/operators'
-import {buyAtMarketPrice, getBalanceForCoin, getSymbolsWithPrices} from '../binance/binance'
+import {buyAtMarketPrice, getBalanceForCoin, getExchangeInfo, getSymbolsWithPrices, roundStep} from '../binance/binance'
 import {config} from '../config/config'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
 import {InvestmentCandidate} from '../find-coins/findInvestmentCandidates'
 
-export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
-  return zip(getFundsToInvest(config.percentToInvest), getSymbolsWithPrices()).pipe(
+export function buyCoins(investmentCandidates: InvestmentCandidate[],) {
+  return zip(
+    getFundsToInvest(config.percentToInvest),
+    getSymbolsWithPrices(),
+    getExchangeInfo()
+  ).pipe(
     tap(it => {console.log('funds to invest: ', it[0])}),
-    map(([fundsToInvest, coinPrices]) =>
+    map(([fundsToInvest, coinPrices, exchangeInfo]) =>
       calculateHowManyOfEachCoinsToBuy({
         fundsToInvest,
         minOrderPrice: config.minOrderAmount,
         coinsToBuy: investmentCandidates.map(e => e.symbol),
+        exchangeInfo,
         coinPrices
       })
     ),
-    mergeMap(it => zip(
-      ...Object.entries(it)
-        .map(([symbol, quantity]) => buyAtMarketPrice(symbol, quantity))
-      )
-    ),
+    mergeMap(it => zip(...it.map(e => buyAtMarketPrice(e.symbol, e.quantity)))),
     map(it => it.filter((e): e is CoinOrder => e !== undefined)),
     mergeMap(it => zip(...it.map(bc => storePurchase(bc, investmentCandidates))))
   )
 }
 
+type Coin = {
+  symbol: string
+  quantity: number
+}
+
 export function calculateHowManyOfEachCoinsToBuy(args: {
+  fundsToInvest: number,
+  minOrderPrice: number,
+  coinsToBuy: string[],
+  exchangeInfo: SymbolInfo[],
+  coinPrices: CoinPrices
+}): Array<Coin> {
+  return args.coinsToBuy.map((symbol) => {
+    const coinPrice = args.coinPrices[symbol]
+    const quantity = args.minOrderPrice / coinPrice
+
+    return {
+      symbol,
+      quantity: roundStep(symbol, quantity, args.exchangeInfo)
+    }
+  }).slice(0, Math.floor(args.fundsToInvest / args.minOrderPrice))
+}
+
+export function calculateHowManyOfEachCoinsToBuy2(args: {
   fundsToInvest: number,
   minOrderPrice: number,
   coinsToBuy: string[],

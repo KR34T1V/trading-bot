@@ -1,6 +1,6 @@
 import Binance, {AccountBalance, CoinOrder, CoinPrices, PreviousDayResult, SymbolInfo, Tick} from 'node-binance-api'
 import {from, Observable, of} from 'rxjs'
-import {catchError, first, map} from 'rxjs/operators'
+import {catchError, first, map, share} from 'rxjs/operators'
 import {config} from '../config/config'
 
 export const binance = new Binance().options(config.binance)
@@ -8,7 +8,8 @@ export const binance = new Binance().options(config.binance)
 export function getExchangeInfo(): Observable<SymbolInfo[]> {
   return from(binance.exchangeInfo()).pipe(
     first(),
-    map(it => it.symbols)
+    map(it => it.symbols),
+    share()
   )
 }
 
@@ -98,4 +99,9 @@ export function getSymbolsWithPrices(): Observable<CoinPrices> {
 export function getPreviousDayTradeStatus(): Observable<PreviousDayResult[]> {
   // @ts-ignore
   return from(binance.prevDay()).pipe(first())
+}
+
+export function getOrderStatus(symbol: string, orderId: number): Observable<PreviousDayResult[]> {
+  // @ts-ignore
+  return from(binance.orderStatus(symbol, orderId)).pipe(first())
 }

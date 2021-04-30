@@ -5,12 +5,11 @@
    "main": "buy.ts",
    "scripts": {
       "check-ts": "yarn tsc --skipLibCheck --noEmit",
-      "simulate-trading": "TRADING_BOT_ENV=simulate NODE_OPTIONS=--max_old_space_size=8192 jest simulate --runInBand",
-      "fetch-simulation-data": "TRADING_BOT_ENV=simulate ts-node --log-error fetchSimulationData.ts",
       "test": "TRADING_BOT_ENV=test jest --runInBand",
       "buy": "TRADING_BOT_ENV=live ts-node --log-error buy.ts",
       "sell": "TRADING_BOT_ENV=live ts-node --log-error sell.ts",
       "dashboard": "clear && TRADING_BOT_ENV=live ts-node --log-error dashboard.ts",
+      "sync": "clear && TRADING_BOT_ENV=live ts-node --log-error syncOrders.ts",
       "live-trading": "TRADING_BOT_ENV=live ts-node --log-error live-trading.ts"
    },
    "author": "vrihlea@gmail.com",
@@ -28,6 +27,7 @@
       "lodash": "^4.17.20",
       "node-binance-api": "^0.11.11",
       "node-schedule": "^1.3.2",
+      "persistent-cache": "^1.1.1",
       "reflect-metadata": "^0.1.10",
       "rxjs": "^6.6.3",
       "simple-statistics": "^7.1.0",
