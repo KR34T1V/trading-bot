@@ -1,22 +1,18 @@
-import {exec} from 'child_process'
-import schedule from 'node-schedule'
-
-// https://crontab.guru
-
-// schedule.scheduleJob('*/19 * * * *', function () {
-//   execWithStdout('yarn dashboard')
-// })
-
-schedule.scheduleJob('*/29 * * * *', function () {
-  execWithStdout('yarn sell')
-})
-
-schedule.scheduleJob('1 */1 * * *', function () {
-  execWithStdout('yarn buy')
-})
+import { exec } from 'child_process'
+import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler"
 
 function execWithStdout(cmd: string) {
   const p = exec(cmd)
   p.stdout?.pipe(process.stdout)
   p.stderr?.pipe(process.stdout)
 }
+
+const task = new Task('simple-task', () => {
+  console.log(new Date())
+  execWithStdout('yarn sell')
+  execWithStdout('yarn buy')
+})
+
+const job = new SimpleIntervalJob({ minutes: 20 }, task)
+new ToadScheduler()
+  .addSimpleIntervalJob(job)
