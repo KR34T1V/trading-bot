@@ -101,7 +101,7 @@ dbConnect().then(conn => {
   //
   //   })
   // )
-  // getAllOrders('COTIBTC').pipe(
+  // getAllOrders('PHBBTC').pipe(
   //   // map(it => it.filter(e => e.side == 'SELL')),
   //   tap(it => {
   //     // console.log(it, '####')
@@ -218,3 +218,20 @@ dbConnect().then(conn => {
 
 // TODO: sell 16 XRP
 
+import { exec } from 'child_process'
+import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler"
+
+function execWithStdout(cmd: string) {
+  const p = exec(cmd)
+  p.stdout?.pipe(process.stdout)
+  p.stderr?.pipe(process.stdout)
+}
+
+const task = new Task('simple-task', () => {
+  console.log(new Date())
+  execWithStdout('yarn dashboard')
+})
+
+const job = new SimpleIntervalJob({ minutes: 15 }, task)
+new ToadScheduler()
+  .addSimpleIntervalJob(job)

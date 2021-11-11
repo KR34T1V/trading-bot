@@ -24,22 +24,19 @@ export function sellCoins(coinsToSell: Purchase[], exchangeInfo: SymbolInfo[]) {
 
 export function findCoinsToSell(
   boughtCoinsObservable: Observable<Purchase[]>,
-  historicPricesObservable: Observable<SymbolPrices[]>,
-  averageProfitPerTransactionObservable: Observable<number>
+  historicPricesObservable: Observable<SymbolPrices[]>
 ) {
   return zip(
     boughtCoinsObservable,
-    historicPricesObservable,
-    averageProfitPerTransactionObservable,
+    historicPricesObservable
   ).pipe(
     map(([
       boughtCoins,
-      historicPrices,
-      averageProfitPerTransaction
+      historicPrices
     ]) => {
       return boughtCoins.filter(e => {
         const historicSymbolPrices = historicPrices.find(a => a.symbol === e.symbol)?.prices
-        if (!historicSymbolPrices ) return false
+        if (!historicSymbolPrices) return false
 
         const currentPrice = historicSymbolPrices[historicSymbolPrices.length - 1]
         const previousPrice = historicSymbolPrices[historicSymbolPrices.length - 2]
@@ -47,11 +44,8 @@ export function findCoinsToSell(
         const profit = (currentPrice - buyPrice) / buyPrice
         const priceChangeSinceLastTick = computePercentIncrease(previousPrice, currentPrice)
 
-        // console.log(`${e.symbol} - ${profit} - ${priceChangeSinceLastTick}. prevT: ${previousPrice} lastT: ${latestPrice} change%: ${computePercentIncrease(previousPrice, latestPrice)}`)
-        // console.log(`${e.symbol} - ${previousDayPriceChangeItem.prevDayPriceChange}`)
-
-        return (profit > config.sellPercent && profit > averageProfitPerTransaction + 0.10)
-        || (profit > config.sellPercent && priceChangeSinceLastTick < -0.005)
+        return profit > config.sellPercent
+          // || (profit > config.sellPercent && priceChangeSinceLastTick < -0.005)
 
       })
     })

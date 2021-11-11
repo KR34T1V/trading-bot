@@ -1627,6 +1627,11 @@ bent@~7.3.6:
     caseless "~0.12.0"
     is-stream "^2.0.0"
 
+bignumber.js@^9.0.0:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.1.tgz#8d7ba124c882bfd8e43260c67475518d0689e4e5"
+  integrity sha512-IdZR9mh6ahOBv/hYGiXyVuyCetmGJhtYkqLBpTStdhEGjegpPlUawydyaF3pbIOFynJTpllEs+NP+CS9jKFLjA==
+
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
@@ -3386,6 +3391,13 @@ jsesc@~0.5.0:
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-0.5.0.tgz#e7dee66e35d6fc16f710fe91d5cf69f70f08911d"
   integrity sha1-597mbjXW/Bb3EP6R1c9p9w8IkR0=
 
+json-bigint@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/json-bigint/-/json-bigint-1.0.0.tgz#ae547823ac0cad8398667f8cd9ef4730f5b01ff1"
+  integrity sha512-SiPv/8VpZuWbvLSMtTDU8hEfrZWg/mH/nV/b4o0CYbSxu1UIQPLdwKOCIyLQX+VIPO5vrLX3i8qtqFyhdPSUSQ==
+  dependencies:
+    bignumber.js "^9.0.0"
+
 json-parse-better-errors@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
@@ -3715,13 +3727,14 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-node-binance-api@^0.11.11:
-  version "0.11.11"
-  resolved "https://registry.yarnpkg.com/node-binance-api/-/node-binance-api-0.11.11.tgz#b96648e2774d526550b609f9f3e22d470381c097"
-  integrity sha512-sP8VjBe4/bKFZx1onMQzLPgYElbt4uolhp+6ld1Vj65xa3GomdqJNQCloeR0CmVEU9Sd9IxszgIfe7y189gmmw==
+node-binance-api@0.13.0:
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/node-binance-api/-/node-binance-api-0.13.0.tgz#e99d68a914ec6b7570b8cc97e613d4bf706bed09"
+  integrity sha512-jFjax3wcmHGDnhWdvZWXc7h3ecq0BLS3syyX8o5vK7ZTgRNzhlSgQOozM0Y0RJV1nguIL+yg0mVzpl3oX5mskA==
   dependencies:
     async "^3.1.0"
     https-proxy-agent "^3.0.1"
+    json-bigint "^1.0.0"
     request "^2.88.0"
     socks-proxy-agent "^4.0.2"
     string-hash "^1.1.3"

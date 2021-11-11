@@ -36,7 +36,5 @@ dbConnect().then(_ => {
     }),
     mergeMap(it => args.dryRun ? [] : buyCoins(it)),
     tap(it => {console.log(it, 'done - buying')})
-  ).subscribe({
-    complete: () => console.log('done - finding')
-  })
+  ).subscribe()
 })

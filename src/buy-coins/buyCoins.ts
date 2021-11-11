@@ -52,41 +52,6 @@ export function calculateHowManyOfEachCoinsToBuy(args: {
   }).slice(0, Math.floor(args.fundsToInvest / args.minOrderPrice))
 }
 
-export function calculateHowManyOfEachCoinsToBuy2(args: {
-  fundsToInvest: number,
-  minOrderPrice: number,
-  coinsToBuy: string[],
-  coinPrices: CoinPrices
-}): CoinPrices {
-  let fundsLeft = args.fundsToInvest
-  let coinsToBuy: {[k: string]: any} = {}
-
-  args.coinsToBuy.forEach((symbol) => {
-    if (args.coinPrices[symbol] <= 0) return // to avoid infinite loops in case of bad data
-    let quantity = 0
-
-    while (true) {
-      if (fundsLeft < 0) {
-        fundsLeft += quantity * args.coinPrices[symbol]
-        break
-      }
-
-      if (quantity * args.coinPrices[symbol] >= args.minOrderPrice) {
-        coinsToBuy[symbol] = quantity
-        // avoid checking other coins if not enough funds
-        if (fundsLeft < args.minOrderPrice) return coinsToBuy
-        // check next coin
-        break
-      }
-
-      quantity += 1
-      fundsLeft -= args.coinPrices[symbol]
-    }
-  })
-
-  return coinsToBuy
-}
-
 export function getFundsToInvest(percentToInvest: number): Observable<number> {
   return getBalanceForCoin(config.baseCurrency).pipe(
     map(it => it * percentToInvest)

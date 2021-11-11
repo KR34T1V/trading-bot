@@ -27,8 +27,7 @@ dbConnect().then(_ => {
       getUnsoldCoins(),
       getAllBTCSymbols().pipe(
         mergeMap(it => getHistoricPricesForSymbols(it, config.historicData))
-      ),
-      getAverageProfitPerTransaction()
+      )
     ),
     getExchangeInfo()
   ).pipe(
@@ -38,7 +37,5 @@ dbConnect().then(_ => {
         : sellCoins(coinsToSell, exchangeInfo)
     }),
     tap(it => console.log(it))
-  ).subscribe({
-    complete: () => console.log('done - selling')
-  })
+  ).subscribe()
 })

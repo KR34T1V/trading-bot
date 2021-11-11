@@ -1,9 +1,9 @@
-import Binance, {AccountBalance, CoinOrder, CoinPrices, PreviousDayResult, SymbolInfo, Tick} from 'node-binance-api'
-import {from, Observable, of} from 'rxjs'
-import {catchError, first, map, share} from 'rxjs/operators'
-import {config} from '../config/config'
+import Binance, { AccountBalance, CoinOrder, CoinPrices, ExchangeInfo, PreviousDayResult, SymbolInfo, Tick } from 'node-binance-api'
+import { from, Observable, of } from 'rxjs'
+import { catchError, first, map, share } from 'rxjs/operators'
+import { config } from '../config/config'
 
-export const binance = new Binance().options(config.binance)
+export const binance = new Binance(config.binance)
 
 export function getExchangeInfo(): Observable<SymbolInfo[]> {
   return from(binance.exchangeInfo()).pipe(
@@ -21,7 +21,7 @@ export function roundStep(symbol: string, quantity: number, exchangeInfo: Symbol
 
 export function getAllSymbols(): Observable<Array<string>> {
   return from(binance.exchangeInfo()).pipe(
-    first(),
+    first<ExchangeInfo>(),
     map(it => it.symbols.filter(e => e.isSpotTradingAllowed && e.status === 'TRADING')),
     map(it => it.map(e => e.symbol))
   )
@@ -29,14 +29,14 @@ export function getAllSymbols(): Observable<Array<string>> {
 
 export function getAllBTCSymbols(): Observable<Array<string>> {
   return from(binance.exchangeInfo()).pipe(
-    first(),
+    first<ExchangeInfo>(),
     map(it => it.symbols.filter(e => e.isSpotTradingAllowed && e.status === 'TRADING')),
     map(it => it.map(e => e.symbol)),
     map(it => it.filter(e => e.endsWith(config.baseCurrency)))
   )
 }
 
-export type SymbolPrices = {symbol: string, prices: Array<number>}
+export type SymbolPrices = { symbol: string, prices: Array<number> }
 
 export function getHistoricPricesForSymbols(
   symbols: Array<string>,
@@ -45,7 +45,7 @@ export function getHistoricPricesForSymbols(
   return from(
     Promise.all(
       symbols.map((s: string) => {
-        return binance.candlesticks(s, historicData.interval, false, {limit: historicData.limit})
+        return binance.candlesticks(s, historicData.interval, false, { limit: historicData.limit })
           .then((t: Tick[]) => ({
             symbol: s,
             prices: getClosePrices(t)
@@ -86,7 +86,7 @@ export function sellAtMarketPrice(symbol: string, quantity: number): Observable<
   return from(binance.marketSell(symbol, quantity)).pipe(
     first(),
     catchError(err => {
-      console.error(`Could not sell coin: ${symbol} - ${quantity}`, err)
+      console.error(`Could not sell coin: ${symbol} - ${quantity}`)
       return of(undefined)
     })
   )

@@ -3,7 +3,7 @@ import {of, throwError} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
 import {SymbolPrices} from '../binance/binance'
 import {mockHistoricPrices, mockSymbols} from '../binance/binance.mock'
-import {excludeExpensiveIndivisibleCoins, excludeSymbolsWithLowPrices} from './findInvestmentCandidates'
+import {excludeExpensiveIndivisibleCoins, excludeSymbolsIfPriceStillDropping} from './findInvestmentCandidates'
 
 jest.mock('../binance/binance', () => ({
     getAllSymbols: jest.fn()
@@ -16,28 +16,16 @@ jest.mock('../binance/binance', () => ({
 const coinPrices = {
   'ETHBTC': 0.00039875,
   'SKYETH': 0.000009,
-  'SKYET2': 0.000009,
-  'SKYET3': 0.0002
+  'SKYET2': 0.000008,
+  'SKYET3': 0.000009
 }
-
-describe(excludeSymbolsWithLowPrices, function () {
-  // TODO: find out what's wrong with `map` in `findInvestmentCandidates`
-  it.skip('excludes symbols if the price is too low', function () {
-    const symbolPrices: SymbolPrices[] = [
-      {symbol: 'SKYET2', prices: [0.0000010]},
-      {symbol: 'SKYETH', prices: [0.0000009]},
-      {symbol: 'WTCBTC', prices: [0.0000008]}
-    ]
-    expect(excludeSymbolsWithLowPrices(symbolPrices)).toEqual([symbolPrices[0]])
-  })
-})
 
 describe(excludeExpensiveIndivisibleCoins, function () {
   it('excludes expensive indivisible coins', marbles(m => {
     const symbolPrices: SymbolPrices[] = [
-      {symbol: 'SKYET2', prices: [0.0000010]},
-      {symbol: 'SKYETH', prices: [0.0000009]},
-      {symbol: 'WTCBTC', prices: [0.0000008]}
+      {symbol: 'SKYET2', prices: []},
+      {symbol: 'SKYETH', prices: []},
+      {symbol: 'WTCBTC', prices: []}
     ]
     const exchangeInfo: SymbolInfo[] = [
       // @ts-ignore
@@ -83,3 +71,16 @@ describe(excludeExpensiveIndivisibleCoins, function () {
     })
   }))
 })
+
+describe(excludeSymbolsIfPriceStillDropping, () => {
+  it('removes coins if previous price is lower than current', () => {
+    const symbolPrices: SymbolPrices[] = [
+      {symbol: 'SKYBTC', prices: [0.009, 0.009, 0.008]},
+      {symbol: 'SKYETH', prices: [0.01, 0.008, 0.009]},
+      {symbol: 'WTCBTC', prices: [0.007, 0.008, 0.008]}
+    ]
+    expect(excludeSymbolsIfPriceStillDropping(symbolPrices)).toEqual([
+      symbolPrices[1]
+    ])
+  });
+});

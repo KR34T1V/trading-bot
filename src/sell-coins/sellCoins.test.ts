@@ -1,5 +1,6 @@
 import {CoinOrder, PreviousDayResult, SymbolInfo} from 'node-binance-api'
 import {of} from 'rxjs'
+import {marbles} from 'rxjs-marbles'
 import {dbClear} from '../db/dbClear'
 import {dbSave} from '../db/dbSave'
 import {mockPurchase} from '../db/entity/Purchase.mock'
@@ -49,14 +50,15 @@ jest.mock('../binance/binance', () => ({
 )
 
 describe(findCoinsToSell, function () {
-  it('returns coins where current-price is higher than buy-price', () => {
-    expect(findCoinsToSell(
+  it('returns coins where current-price is higher than buy-price', marbles(m => {
+    m.expect(findCoinsToSell(
       of([purchase]),
-      of(coinPrices),
-      of(0)
+      of(coinPrices)
       )
-    ).toEqual([purchase])
-  })
+    ).toBeObservable('(a|)', {
+      a: [purchase]
+    })
+  }))
 })
 
 describe(sellCoins, function () {

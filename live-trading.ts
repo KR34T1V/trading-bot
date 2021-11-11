@@ -13,6 +13,6 @@ const task = new Task('simple-task', () => {
   execWithStdout('yarn buy')
 })
 
-const job = new SimpleIntervalJob({ minutes: 20 }, task)
+const job = new SimpleIntervalJob({ minutes: 15 }, task)
 new ToadScheduler()
   .addSimpleIntervalJob(job)

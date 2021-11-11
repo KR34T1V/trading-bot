@@ -1,5 +1,4 @@
 import {map} from 'rxjs/operators'
-import {getBoughtCoins} from '../db/fetcher/getBoughtCoins'
 import {getUnsoldCoins} from '../db/fetcher/getUnsoldCoins'
 
 export function getInvestedAmount() {

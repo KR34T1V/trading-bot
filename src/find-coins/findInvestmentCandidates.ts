@@ -1,9 +1,10 @@
 import _ from 'lodash'
-import {CoinPrices, PreviousDayResult, SymbolInfo} from 'node-binance-api'
+import {CoinPrices, SymbolInfo} from 'node-binance-api'
 import {Observable, zip} from 'rxjs'
 import {map, mergeMap} from 'rxjs/operators'
-import {getAllSymbols, getHistoricPricesForSymbols, SymbolPrices} from '../binance/binance'
+import {getAllSymbols, getBalanceForCoin, getHistoricPricesForSymbols, SymbolPrices} from '../binance/binance'
 import {config} from '../config/config'
+import {getInvestedAmount} from '../dashboard/getInvestedAmount'
 import {Purchase} from '../db/entity/Purchase'
 import {
   buildInvestmentCandidates,
@@ -30,10 +31,8 @@ export function findInvestmentCandidates(
   return getAllSymbols().pipe(
     map(excludeNonBTCSymbols),
     mergeMap(it => getHistoricPricesForSymbols(it, config.historicData)),
-    // map(excludeSymbolsWithLowPrices),
-    // map(excludeNewlyAddedCoins), // one of those things
+    map(excludeSymbolsIfPriceStillDropping),
     mergeMap(it => excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(it, unsoldCoins, coinPrices)),
-    // mergeMap(it => excludeSymbolsIfPriceStillDropping(it, previousDayTrades)),
     mergeMap(it => excludeExpensiveIndivisibleCoins(it, exchangeInfo, coinPrices)),
     map(it => it.map(buildInvestmentCandidates)),
     map(it => excludeSymbolsWithTooLowPriceSwing(it, config.priceSwing)),
@@ -41,22 +40,18 @@ export function findInvestmentCandidates(
   )
 }
 
-export function excludeNewlyAddedCoins(sp: SymbolPrices[]): SymbolPrices[] {
-  return sp.filter(e => e.prices.length >= config.historicData.limit)
-}
-
-export function excludeSymbolsWithLowPrices(sp: SymbolPrices[]): SymbolPrices[] {
-  return sp.filter(e => e.prices[e.prices.length - 1] > 0.0000009)
-    .filter(e => e.prices.length >= config.historicData.limit)
-}
-
 export function excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(
   historicPrices: SymbolPrices[],
   unsoldCoins: Observable<Purchase[]>,
   coinPrices: Observable<CoinPrices>
 ): Observable<SymbolPrices[]> {
-  return zip(unsoldCoins, coinPrices).pipe(
-    map(([unsold, latestPrices]) => {
+  return zip(
+    unsoldCoins,
+    coinPrices,
+    getBalanceForCoin(config.baseCurrency),
+    getInvestedAmount(),
+    ).pipe(
+    map(([unsold, latestPrices, availableFunds, investedFunds]) => {
       return historicPrices.filter(e => {
         const latestPrice = latestPrices[e.symbol]
         const latestUnsold = unsold
@@ -66,28 +61,24 @@ export function excludeSymbolsIfPriceHasNotDroppedSinceLastPurchase(
           ? latestUnsold.buyPrice / latestUnsold.quantity
           : 999999
 
-        return latestPrice < previousBuyPrice * 0.83
+        return latestPrice < previousBuyPrice * lerp(0.7, 0.9, availableFunds/investedFunds)
       })
     })
   )
 }
 
-export function excludeSymbolsIfPriceStillDropping(
-  historicPrices: SymbolPrices[],
-  previousDayTradeStatus: Observable<PreviousDayResult[]>
-): Observable<SymbolPrices[]> {
-  return previousDayTradeStatus.pipe(
-    map(it => {
-      return historicPrices.filter(hp => {
-        const prevDayStatus = _.find(it, ['symbol', hp.symbol])
-        if (!prevDayStatus) return false
+// https://www.trysmudford.com/blog/linear-interpolation-functions/
+function lerp(a: number, b: number, amount: number): number {
+  return (1 - amount) * a + amount * b
+}
 
-        const priceChange = Number(prevDayStatus.priceChangePercent)
-        return priceChange > -5
-          && priceChange < 5
-      })
-    })
-  )
+export function excludeSymbolsIfPriceStillDropping(
+  historicPrices: SymbolPrices[]
+): SymbolPrices[] {
+  return historicPrices.filter(hp => {
+    const [currentPrice, previousPrice] = _.takeRight(hp.prices, 2)
+    return currentPrice < previousPrice
+  })
 }
 
 // Indivisible - meaning you can not sell half a coin
@@ -104,7 +95,7 @@ export function excludeExpensiveIndivisibleCoins(
       const lotSize = symbolExchangeInfo.filters.find(a => a.filterType === 'LOT_SIZE')?.stepSize ?? '1'
 
       return Number(lotSize) < 1
-        || (Number(lotSize) === 1 && coinPrice < 0.000009)
+        || (Number(lotSize) === 1 && coinPrice < config.minOrderAmount / 11)
     }))
   )
 }

@@ -29,6 +29,7 @@ export function prioritizeWhatCoinsToBuy(
 
       return orderBy(investmentCandidatesWithAmount, ['priceSwing', 'boughtAmount'], ['asc', 'desc'])
         .map(e => {
+          // @ts-ignore
           delete e.boughtAmount
           return e
         })

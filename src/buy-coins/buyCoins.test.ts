@@ -41,7 +41,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       coinPrices
     })).toEqual([
       {symbol: 'a', quantity: 3},
-      {symbol: 'b', quantity: 2}
+      {symbol: 'b', quantity: 1.5}
     ])
   })
   it('returns empty object if not enough funds', function () {
@@ -100,7 +100,7 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
 
 jest.mock('../binance/binance', () => ({
     getBalanceForCoin: jest.fn(() => of(0.5)),
-    roundStep: jest.fn(() => 1),
+    roundStep: jest.fn((s: string, q: number) => Number(q.toFixed(1))),
   })
 )
 

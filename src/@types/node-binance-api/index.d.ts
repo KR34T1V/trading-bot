@@ -1,17 +1,4 @@
 declare module 'node-binance-api' {
-  export default class Binance {
-    options(binance: {APIKEY?: string; APISECRET?: string}): Binance
-
-    candlesticks(symbol: string, interval: string, callback: any, options: Options): Promise<Tick[]>
-
-    balance(): Promise<AccountBalance>
-    exchangeInfo(): Promise<ExchangeInfo>
-
-    prices(): Promise<CoinPrices>
-    marketBuy(symbol: string, quantity: number): Promise<CoinOrder>
-    marketSell(symbol: string, quantity: number): Promise<CoinOrder>
-    roundStep(amount: number, stepSize: string): number
-  }
 
   export type ExchangeInfo = {
     symbols: SymbolInfo[]

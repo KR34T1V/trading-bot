@@ -17,7 +17,12 @@ export function getAdjustedPrices(
         const coinBalance = Number(value.available)
         const adjustedBalance = prices[`${key}${config.baseCurrency}`]
         if (coinBalance && adjustedBalance) {
-          adjusted += coinBalance * adjustedBalance
+          // TODO: ask binance to remove this coin (delisted but still returing wrong price)
+          if (key === 'SUN') {
+            return 0
+          }
+
+          return adjusted += coinBalance * adjustedBalance
         }
       })
       return adjusted

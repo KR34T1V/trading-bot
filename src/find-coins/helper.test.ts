@@ -69,7 +69,7 @@ describe(detectDescendingTrend, function () {
       0.00000567, 0.00000688, 0.00000574,
       0.00000559, 0.00000479, 0.00000457
     ]
-    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-(config.detectDescendingSize * 3)))
+    expect(detectDescendingTrend(prices)).toEqual(prices.slice(-(config.detectDescendingSize * 2)))
   })
 
   it('AGIBTC - 21.02.21', function () {
