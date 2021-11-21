@@ -95,7 +95,7 @@ export function excludeExpensiveIndivisibleCoins(
       const lotSize = symbolExchangeInfo.filters.find(a => a.filterType === 'LOT_SIZE')?.stepSize ?? '1'
 
       return Number(lotSize) < 1
-        || (Number(lotSize) === 1 && coinPrice < config.minOrderAmount / 11)
+        || (Number(lotSize) === 1 && coinPrice < config.minOrderAmount / 12)
     }))
   )
 }

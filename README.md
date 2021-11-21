@@ -4,6 +4,9 @@
 https://www.binance.com/en/support/articles/360002502072
 
 - update the configs from `src/config/config.ts`
+# Dependencies
+nodejs/yarn/sqlite3/python
+
 
 # Buying
 

@@ -2,6 +2,11 @@ import {of} from 'rxjs'
 import {marbles} from 'rxjs-marbles'
 import {calculateHowManyOfEachCoinsToBuy, getFundsToInvest} from './buyCoins'
 
+jest.mock('../binance/binance', () => ({
+  getBalanceForCoin: jest.fn(() => of(0.5)),
+  roundStep: jest.fn((s: string, q: number) => Number(q.toFixed(1))),
+}))
+
 describe(calculateHowManyOfEachCoinsToBuy, function () {
   const exchangeInfo: Array<any> = []
   it('returns how much to buy', function () {
@@ -97,12 +102,6 @@ describe(calculateHowManyOfEachCoinsToBuy, function () {
       .toEqual(expected)
   })
 })
-
-jest.mock('../binance/binance', () => ({
-    getBalanceForCoin: jest.fn(() => of(0.5)),
-    roundStep: jest.fn((s: string, q: number) => Number(q.toFixed(1))),
-  })
-)
 
 describe(getFundsToInvest, function () {
   it('returns amount to invest', marbles(m => {

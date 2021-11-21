@@ -66,8 +66,7 @@ describe(sellCoins, function () {
     await dbClear()
   })
 
-  it('sells coin and stores sell-price', async done => {
-    expect.assertions(2)
+  it('sells coin and stores sell-price', async () => {
     const unsoldPurchase1 = await dbSave(purchase).toPromise()
     const unsoldPurchase2 = await dbSave(purchase2).toPromise()
     const exchangeInfo = {
@@ -80,14 +79,11 @@ describe(sellCoins, function () {
       ]
     } as SymbolInfo
 
-    sellCoins([unsoldPurchase1, unsoldPurchase2], [exchangeInfo]).subscribe(
-      {
-        next: (it) => {
-          expect(it[0]?.sell.sellPrice).toBe(0.3)
-          expect(it[1]).toBe(undefined)
-        },
-        complete: () => done()
-      }
-    )
+    return sellCoins([unsoldPurchase1, unsoldPurchase2], [exchangeInfo])
+    .toPromise()
+    .then(it => {
+      expect(it[0]?.sell.sellPrice).toBe(0.3)
+    })
+    .finally(() => expect.assertions(1))
   })
 })

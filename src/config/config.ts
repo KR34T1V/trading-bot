@@ -9,7 +9,7 @@ export const config = {
     interval: '8h',
     limit: 90
   },
-  sellPercent: 0.10,
+  sellPercent: 0.09,
   fee: 0.99,
   minOrderAmount: 0.00012, // min 0.000125
   priceSwing: -9, // only buy if the price dropped low enough (in percent)

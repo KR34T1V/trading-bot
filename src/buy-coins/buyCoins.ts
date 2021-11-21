@@ -1,31 +1,30 @@
 import {CoinOrder, CoinPrices, SymbolInfo} from 'node-binance-api'
-import {Observable, zip} from 'rxjs'
-import {map, mergeMap, tap} from 'rxjs/operators'
+import {from, Observable, zip} from 'rxjs'
+import {concatMap, map, mergeMap, tap} from 'rxjs/operators'
 import {buyAtMarketPrice, getBalanceForCoin, getExchangeInfo, getSymbolsWithPrices, roundStep} from '../binance/binance'
 import {config} from '../config/config'
 import {dbSave} from '../db/dbSave'
 import {Purchase} from '../db/entity/Purchase'
 import {InvestmentCandidate} from '../find-coins/findInvestmentCandidates'
 
-export function buyCoins(investmentCandidates: InvestmentCandidate[],) {
+export function buyCoins(investmentCandidates: InvestmentCandidate[]) {
   return zip(
     getFundsToInvest(config.percentToInvest),
     getSymbolsWithPrices(),
     getExchangeInfo()
   ).pipe(
     tap(it => {console.log('funds to invest: ', it[0])}),
-    map(([fundsToInvest, coinPrices, exchangeInfo]) =>
-      calculateHowManyOfEachCoinsToBuy({
+    concatMap(([fundsToInvest, coinPrices, exchangeInfo]) =>
+      from(calculateHowManyOfEachCoinsToBuy({
         fundsToInvest,
         minOrderPrice: config.minOrderAmount,
         coinsToBuy: investmentCandidates.map(e => e.symbol),
         exchangeInfo,
         coinPrices
-      })
+      }))
     ),
-    mergeMap(it => zip(...it.map(e => buyAtMarketPrice(e.symbol, e.quantity)))),
-    map(it => it.filter((e): e is CoinOrder => e !== undefined)),
-    mergeMap(it => zip(...it.map(bc => storePurchase(bc, investmentCandidates))))
+    mergeMap(it => buyAtMarketPrice(it.symbol, it.quantity)),
+    concatMap(it => storePurchase(it, investmentCandidates))
   )
 }
 

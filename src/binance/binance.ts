@@ -1,7 +1,7 @@
-import Binance, { AccountBalance, CoinOrder, CoinPrices, ExchangeInfo, PreviousDayResult, SymbolInfo, Tick } from 'node-binance-api'
-import { from, Observable, of } from 'rxjs'
-import { catchError, first, map, share } from 'rxjs/operators'
-import { config } from '../config/config'
+import Binance, {AccountBalance, CoinOrder, CoinPrices, ExchangeInfo, PreviousDayResult, SymbolInfo, Tick} from 'node-binance-api'
+import {EMPTY, from, Observable, of} from 'rxjs'
+import {catchError, first, map, share} from 'rxjs/operators'
+import {config} from '../config/config'
 
 export const binance = new Binance(config.binance)
 
@@ -36,7 +36,7 @@ export function getAllBTCSymbols(): Observable<Array<string>> {
   )
 }
 
-export type SymbolPrices = { symbol: string, prices: Array<number> }
+export type SymbolPrices = {symbol: string, prices: Array<number>}
 
 export function getHistoricPricesForSymbols(
   symbols: Array<string>,
@@ -45,7 +45,7 @@ export function getHistoricPricesForSymbols(
   return from(
     Promise.all(
       symbols.map((s: string) => {
-        return binance.candlesticks(s, historicData.interval, false, { limit: historicData.limit })
+        return binance.candlesticks(s, historicData.interval, false, {limit: historicData.limit})
           .then((t: Tick[]) => ({
             symbol: s,
             prices: getClosePrices(t)
@@ -72,12 +72,12 @@ export function getAccountBalance(): Observable<AccountBalance> {
   )
 }
 
-export function buyAtMarketPrice(symbol: string, quantity: number): Observable<CoinOrder | undefined> {
+export function buyAtMarketPrice(symbol: string, quantity: number): Observable<CoinOrder> {
   return from(binance.marketBuy(symbol, quantity)).pipe(
     first(),
     catchError(err => {
       console.error(`Could not buy coin: ${symbol} - ${quantity}`, err)
-      return of(undefined)
+      return EMPTY
     })
   )
 }

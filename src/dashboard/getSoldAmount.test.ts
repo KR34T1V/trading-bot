@@ -9,7 +9,7 @@ describe(getSoldAmount, function () {
     await dbClear()
   })
 
-  it('returns invested amount', async done => {
+  it('returns invested amount', async () => {
     await dbSave(mockPurchase({
       buyTime: new Date,
       buyPrice: 0.1,
@@ -37,13 +37,13 @@ describe(getSoldAmount, function () {
       symbol: 'ETHBTC3',
     })).toPromise()
 
-    getSoldAmount().subscribe({
-      next: it => {
-        expect(it).toBe(0.22 + 0.41)
-      },
-      complete: () => done()
+    return getSoldAmount()
+    .toPromise()
+    .then(it => {
+      expect(it).toBe(0.22 + 0.41)
     })
-    expect.assertions(1)
+    .finally(() => expect.assertions(1))
+
   })
 
 })
